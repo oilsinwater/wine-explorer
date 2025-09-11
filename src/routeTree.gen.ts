@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router';
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root';
+import { Route as WineExplorerImport } from './pages/wine-explorer';
 import { Route as IndexImport } from './pages/index';
 import { Route as SearchDataRepositoriesIndexImport } from './pages/search-data-repositories/index';
 import { Route as PlaygroundIndexImport } from './pages/playground/index';
@@ -65,6 +66,12 @@ const ContributeDataRoute = ContributeDataImport.update({
 const CompareDataRoute = CompareDataImport.update({
   id: '/compare-data',
   path: '/compare-data',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const WineExplorerRoute = WineExplorerImport.update({
+  id: '/wine-explorer',
+  path: '/wine-explorer',
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -239,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/';
       fullPath: '/';
       preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/wine-explorer': {
+      id: '/wine-explorer';
+      path: '/wine-explorer';
+      fullPath: '/wine-explorer';
+      preLoaderRoute: typeof WineExplorerImport;
       parentRoute: typeof rootRoute;
     };
     '/compare-data': {
@@ -564,6 +578,7 @@ const RunComputationRouteWithChildren = RunComputationRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute;
+  '/wine-explorer': typeof WineExplorerRoute;
   '/compare-data': typeof CompareDataLayoutRouteWithChildren;
   '/contribute-data': typeof ContributeDataLayoutRouteWithChildren;
   '/explore-data/$id': typeof ExploreDataIdRoute;
@@ -592,6 +607,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
+  '/wine-explorer': typeof WineExplorerRoute;
   '/compare-data': typeof CompareDataLayoutIndexRoute;
   '/contribute-data': typeof ContributeDataLayoutIndexRoute;
   '/explore-data/$id': typeof ExploreDataIdRoute;
@@ -618,6 +634,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   '/': typeof IndexRoute;
+  '/wine-explorer': typeof WineExplorerRoute;
   '/compare-data': typeof CompareDataRouteWithChildren;
   '/compare-data/_layout': typeof CompareDataLayoutRouteWithChildren;
   '/contribute-data': typeof ContributeDataRouteWithChildren;
@@ -652,6 +669,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
+    | '/wine-explorer'
     | '/compare-data'
     | '/contribute-data'
     | '/explore-data/$id'
@@ -679,6 +697,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
+    | '/wine-explorer'
     | '/compare-data'
     | '/contribute-data'
     | '/explore-data/$id'
@@ -703,6 +722,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/wine-explorer'
     | '/compare-data'
     | '/compare-data/_layout'
     | '/contribute-data'
@@ -736,6 +756,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  WineExplorerRoute: typeof WineExplorerRoute;
   CompareDataRoute: typeof CompareDataRouteWithChildren;
   ContributeDataRoute: typeof ContributeDataRouteWithChildren;
   ExploreDataIdRoute: typeof ExploreDataIdRoute;
@@ -751,6 +772,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  WineExplorerRoute: WineExplorerRoute,
   CompareDataRoute: CompareDataRouteWithChildren,
   ContributeDataRoute: ContributeDataRouteWithChildren,
   ExploreDataIdRoute: ExploreDataIdRoute,
@@ -775,6 +797,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/wine-explorer",
         "/compare-data",
         "/contribute-data",
         "/explore-data/$id",
@@ -790,6 +813,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/wine-explorer": {
+      "filePath": "wine-explorer.tsx"
     },
     "/compare-data": {
       "filePath": "compare-data",

@@ -4,6 +4,9 @@ import { AppAction, AppActionType } from './actions';
 export interface AppState {
   appTitle: string;
   apiModalOpen: boolean;
+  currentDataset: 'red' | 'white';
+  loading: boolean;
+  error: string | null;
 }
 
 /**
@@ -23,6 +26,9 @@ const AppContext = React.createContext<
 const initialState: AppState = {
   appTitle: '',
   apiModalOpen: false,
+  currentDataset: 'red',
+  loading: false,
+  error: null,
 };
 
 const initState = (state: AppState, props: AppProviderProps) => {
@@ -45,6 +51,24 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         apiModalOpen: false,
+      };
+    }
+    case AppActionType.SET_DATASET: {
+      return {
+        ...state,
+        currentDataset: action.payload,
+      };
+    }
+    case AppActionType.SET_LOADING: {
+      return {
+        ...state,
+        loading: action.payload,
+      };
+    }
+    case AppActionType.SET_ERROR: {
+      return {
+        ...state,
+        error: action.payload,
       };
     }
     default: {
