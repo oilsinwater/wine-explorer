@@ -1,6 +1,13 @@
-import React from 'react';
-import { Card, CardContent, Typography, Stack, Box } from '@mui/material';
-import { useAppState } from '../context/ContextProvider';
+import React, { useContext } from 'react';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Box,
+  CircularProgress,
+} from '@mui/material';
+import { WineDataContext } from '../context/WineDataContext';
 
 export interface InfoPanelProps {
   className?: string;
@@ -10,7 +17,7 @@ export interface InfoPanelProps {
  * Component for displaying dataset metadata information
  */
 export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
-  const { state } = useAppState();
+  const context = useContext(WineDataContext);
 
   // Dataset metadata based on the UCI Wine Quality dataset
   const datasetInfo = {
@@ -54,7 +61,21 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
     },
   };
 
-  const currentDataset = datasetInfo[state.currentDataset];
+  if (!context) {
+    return <CircularProgress />;
+  }
+
+  const {
+    currentDataset,
+    wineData,
+    filteredData,
+    loading,
+    error,
+    isFiltering,
+  } = context;
+  const currentDatasetInfo = datasetInfo[currentDataset];
+  const filteredCount = filteredData.length;
+  const totalCount = wineData.length;
 
   return (
     <Card
@@ -69,32 +90,53 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
         <Typography variant="h6" component="h3" gutterBottom>
           Dataset Information
         </Typography>
-        <Stack spacing={1}>
-          <Box>
-            <Typography variant="subtitle2" component="span">
-              Source:{' '}
-            </Typography>
-            <Typography variant="body2" component="span">
-              {currentDataset.source}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" component="span">
-              DOI:{' '}
-            </Typography>
-            <Typography variant="body2" component="span">
-              {currentDataset.doi}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" component="span">
-              Instances:{' '}
-            </Typography>
-            <Typography variant="body2" component="span">
-              {currentDataset.totalInstances.toLocaleString()}
-            </Typography>
-          </Box>
-        </Stack>
+        {loading ? (
+          <CircularProgress />
+        ) : error ? (
+          <Typography variant="body2" color="error">
+            Error loading dataset information.
+          </Typography>
+        ) : (
+          <Stack spacing={1}>
+            <Box>
+              <Typography variant="subtitle2" component="span">
+                Source:{' '}
+              </Typography>
+              <Typography variant="body2" component="span">
+                {currentDatasetInfo.source}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" component="span">
+                DOI:{' '}
+              </Typography>
+              <Typography variant="body2" component="span">
+                {currentDatasetInfo.doi}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Box>
+                <Typography variant="subtitle2" component="span">
+                  Instances:{' '}
+                </Typography>
+                <Typography variant="body2" component="span">
+                  {filteredCount.toLocaleString()}
+                  {filteredCount !== totalCount && (
+                    <span> of {totalCount.toLocaleString()} shown</span>
+                  )}
+                </Typography>
+              </Box>
+              {isFiltering && (
+                <Box display="inline-flex" alignItems="center" gap={0.5}>
+                  <CircularProgress size={12} />
+                  <Typography variant="caption" color="text.secondary">
+                    Updating...
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Stack>
+        )}
       </CardContent>
     </Card>
   );
