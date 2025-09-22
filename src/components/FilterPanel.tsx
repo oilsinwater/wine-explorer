@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -7,9 +7,11 @@ import {
   Typography,
   Stack,
   debounce,
+  CircularProgress,
 } from '@mui/material';
 import { WineDataContext } from '../context/WineDataContext';
 import { RangeSlider } from './RangeSlider';
+import { FilterCriteria } from '../utils/WineDataManager';
 
 export interface FilterPanelProps {
   className?: string;
@@ -26,8 +28,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ className }) => {
     return <div>Loading...</div>;
   }
 
-  const { filters, updateFilters, clearFilters, featureRanges, loading } =
-    context;
+  const {
+    filters,
+    updateFilters,
+    clearFilters,
+    featureRanges,
+    loading,
+    isFiltering,
+  } = context;
 
   // Local state for slider values to enable debouncing
   const [localFilters, setLocalFilters] = useState(filters);
@@ -46,9 +54,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ className }) => {
   }, [context.filteredData.length]);
 
   // Debounced update function
-  const debouncedUpdateFilters = debounce((newFilters) => {
-    updateFilters(newFilters);
-  }, 300);
+  const debouncedUpdateFilters = useMemo(
+    () =>
+      debounce((newFilters: Partial<FilterCriteria>) => {
+        updateFilters(newFilters);
+      }, 300),
+    [updateFilters]
+  );
+
+  useEffect(() => {
+    return () => {
+      const maybeClear = (debouncedUpdateFilters as any)?.clear;
+      if (typeof maybeClear === 'function') {
+        maybeClear();
+      }
+    };
+  }, [debouncedUpdateFilters]);
 
   // Handle slider changes
   const handleAlcoholChange = (event: Event, newValue: number | number[]) => {
@@ -104,15 +125,25 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ className }) => {
             <Typography variant="h6" component="h3">
               Filters
             </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleClearFilters}
-              disabled={loading}
-              aria-label="Clear all filters"
-            >
-              Clear All
-            </Button>
+            <Box display="flex" alignItems="center" gap={1.5}>
+              {(loading || isFiltering) && (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CircularProgress size={18} aria-hidden />
+                  <Typography variant="caption" color="text.secondary">
+                    {loading ? 'Loading...' : 'Updating...'}
+                  </Typography>
+                </Box>
+              )}
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleClearFilters}
+                disabled={loading}
+                aria-label="Clear all filters"
+              >
+                Clear All
+              </Button>
+            </Box>
           </Box>
 
           <Box>

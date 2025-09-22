@@ -46,6 +46,7 @@ const mockContext = {
   filteredData: mockWineData,
   currentDataset: 'red' as WineDataSet,
   loading: false,
+  isFiltering: false,
   error: null,
   switchDataset: vi.fn(),
   filters: {
@@ -133,5 +134,15 @@ describe('VisualizationArea', () => {
     expect(
       screen.getByRole('button', { name: /scatterplot/i })
     ).toBeInTheDocument();
+  });
+
+  it('shows visualization loading overlay while filtering', () => {
+    render(
+      <WineDataContext.Provider value={{ ...mockContext, isFiltering: true }}>
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    expect(screen.getByText('Updating visualization...')).toBeInTheDocument();
   });
 });

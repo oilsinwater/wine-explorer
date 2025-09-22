@@ -30,6 +30,7 @@ const mockContext = {
   filteredData: [] as WineDataPoint[],
   currentDataset: 'red' as WineDataSet,
   loading: false,
+  isFiltering: false,
   error: null,
   filters: mockFilters,
   featureRanges: mockFeatureRanges,
@@ -95,5 +96,15 @@ describe('FilterPanel', () => {
 
     const clearButton = screen.getByText('Clear All');
     expect(clearButton).toBeDisabled();
+  });
+
+  it('shows filtering indicator when filters are updating', () => {
+    render(
+      <WineDataContext.Provider value={{ ...mockContext, isFiltering: true }}>
+        <FilterPanel />
+      </WineDataContext.Provider>
+    );
+
+    expect(screen.getByText('Updating...')).toBeInTheDocument();
   });
 });

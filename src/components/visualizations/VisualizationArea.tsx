@@ -10,6 +10,7 @@ import {
   FormControl,
   InputLabel,
   Stack,
+  Fade,
 } from '@mui/material';
 import { WineDataContext } from '../../context/WineDataContext';
 import { HistogramPlot } from './HistogramPlot';
@@ -30,7 +31,7 @@ export const VisualizationArea: React.FC = () => {
     return <CircularProgress />;
   }
 
-  const { filteredData, loading, error } = context;
+  const { filteredData, loading, error, isFiltering } = context;
 
   const handleVisualizationChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -162,16 +163,49 @@ export const VisualizationArea: React.FC = () => {
         )}
       </Stack>
 
-      <Box sx={{ height: 'calc(100% - 60px)', width: '100%' }}>
-        {selectedVisualization === 'histogram' ? (
-          <HistogramPlot data={filteredData || []} feature={selectedXFeature} />
-        ) : (
-          <ScatterPlot
-            data={filteredData || []}
-            xFeature={selectedXFeature}
-            yFeature={selectedYFeature}
-          />
+      <Box
+        sx={{
+          position: 'relative',
+          height: 'calc(100% - 60px)',
+          width: '100%',
+        }}
+      >
+        {isFiltering && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'rgba(255, 255, 255, 0.72)',
+              zIndex: 1,
+            }}
+            aria-live="polite"
+          >
+            <CircularProgress size={36} />
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Updating visualization...
+            </Typography>
+          </Box>
         )}
+        <Fade in={!isFiltering} timeout={{ enter: 200, exit: 0 }}>
+          <Box sx={{ height: '100%', width: '100%' }}>
+            {selectedVisualization === 'histogram' ? (
+              <HistogramPlot
+                data={filteredData || []}
+                feature={selectedXFeature}
+              />
+            ) : (
+              <ScatterPlot
+                data={filteredData || []}
+                xFeature={selectedXFeature}
+                yFeature={selectedYFeature}
+              />
+            )}
+          </Box>
+        </Fade>
       </Box>
     </Box>
   );
