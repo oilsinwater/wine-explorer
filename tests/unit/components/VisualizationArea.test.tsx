@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { VisualizationArea } from '../../../src/components/visualizations/VisualizationArea';
 import { WineDataContext } from '../../../src/context/WineDataContext';
 import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
@@ -64,14 +64,67 @@ const mockContext = {
 };
 
 describe('VisualizationArea', () => {
-  it('renders loading state', () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('shows visualization skeleton with delayed appearance while loading', () => {
+    vi.useFakeTimers();
     render(
       <WineDataContext.Provider value={{ ...mockContext, loading: true }}>
         <VisualizationArea />
       </WineDataContext.Provider>
     );
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    expect(screen.getByText(/loading data/i)).toBeInTheDocument();
+
+    expect(
+      screen.queryByTestId('visualization-skeleton')
+    ).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
+  it('keeps skeleton visible for minimum duration before hiding', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <WineDataContext.Provider value={{ ...mockContext, loading: true }}>
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    rerender(
+      <WineDataContext.Provider value={{ ...mockContext, loading: false }}>
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    // Should remain visible until minimum display time (300ms) elapsed
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(120);
+    });
+    expect(screen.getByTestId('visualization-skeleton').style.opacity).toBe(
+      '0'
+    );
+
+    vi.useRealTimers();
   });
 
   it('renders error state', () => {
@@ -144,5 +197,19 @@ describe('VisualizationArea', () => {
     );
 
     expect(screen.getByText('Updating visualization...')).toBeInTheDocument();
+  });
+
+  it('shows empty state message when no filtered results', () => {
+    render(
+      <WineDataContext.Provider
+        value={{ ...mockContext, filteredData: [], loading: false }}
+      >
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    expect(
+      screen.getByText(/No records match the current filters/i)
+    ).toBeInTheDocument();
   });
 });
