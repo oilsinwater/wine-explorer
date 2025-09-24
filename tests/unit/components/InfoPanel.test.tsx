@@ -40,6 +40,7 @@ describe('InfoPanel', () => {
     wineData: mockWineData,
     filteredData: mockWineData,
     currentDataset: 'red' as WineDataSet,
+    loadStatus: 'ready' as const,
     loading: false,
     isFiltering: false,
     error: null,
@@ -56,6 +57,8 @@ describe('InfoPanel', () => {
       pH: { min: 2.7, max: 4.0 },
       volatileAcidity: { min: 0.1, max: 1.2 },
     },
+    retryLoad: () => {},
+    lastLoadedAt: null,
   };
 
   it('renders dataset information', () => {
@@ -103,27 +106,33 @@ describe('InfoPanel', () => {
     expect(instancesElement.nextElementSibling).toHaveTextContent('2');
   });
 
-  it('displays loading indicator when loading', () => {
+  it('displays loading state when dataset is loading', () => {
     render(
-      <WineDataContext.Provider value={{ ...mockContext, loading: true }}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loading: true, loadStatus: 'loading' }}
+      >
         <InfoPanel />
       </WineDataContext.Provider>
     );
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByText(/Source:/i)).not.toBeInTheDocument();
   });
 
-  it('displays error message when error occurs', () => {
-    const mockError = new Error('Failed to load info');
+  it('displays error message when dataset fails to load', () => {
+    const mockError = {
+      title: 'Unable to load dataset',
+      description: 'Network issue',
+      retryable: true,
+    };
     render(
-      <WineDataContext.Provider value={{ ...mockContext, error: mockError }}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'error', error: mockError }}
+      >
         <InfoPanel />
       </WineDataContext.Provider>
     );
 
-    expect(
-      screen.getByText(/error loading dataset information/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Network issue/i)).toBeInTheDocument();
   });
 
   it('renders filtering indicator when results are updating', () => {
