@@ -38,6 +38,16 @@ export const VisualizationArea: React.FC = () => {
   const { filteredData, loading, error, isFiltering, loadStatus, retryLoad } =
     context;
 
+  const showSkeleton = useDelayedVisibility(loadStatus === 'loading', {
+    enterDelayMs: 100,
+    minVisibleMs: 300,
+  });
+
+  const datasetError = loadStatus === 'error' && error;
+  const datasetReady = loadStatus === 'ready';
+  const datasetEmpty = datasetReady && filteredData.length === 0;
+  const controlsDisabled = !datasetReady || loading;
+
   const availableFeatures = useMemo(() => {
     if (!filteredData || filteredData.length === 0) {
       return [] as (keyof WineDataPoint)[];
@@ -50,6 +60,7 @@ export const VisualizationArea: React.FC = () => {
     });
   }, [filteredData]);
 
+  // Ensure selected feature is valid for the current dataset
   useEffect(() => {
     if (availableFeatures.length === 0) {
       return;
@@ -70,16 +81,6 @@ export const VisualizationArea: React.FC = () => {
     }
   }, [availableFeatures, selectedYFeature]);
 
-  const showSkeleton = useDelayedVisibility(loadStatus === 'loading', {
-    enterDelayMs: 100,
-    minVisibleMs: 300,
-  });
-
-  const datasetError = loadStatus === 'error' && error;
-  const datasetReady = loadStatus === 'ready';
-  const datasetEmpty = datasetReady && filteredData.length === 0;
-  const controlsDisabled = !datasetReady || loading;
-
   const handleVisualizationChange = (
     event: React.MouseEvent<HTMLElement>,
     newVisualization: 'histogram' | 'scatterplot' | null
@@ -93,9 +94,8 @@ export const VisualizationArea: React.FC = () => {
     setSelectedXFeature(event.target.value as keyof WineDataPoint);
   };
 
-  const handleYFeatureChange = (event: any) => {
-    setSelectedYFeature(event.target.value as keyof WineDataPoint);
-  };
+  const formatFeatureLabel = (feature: keyof WineDataPoint) =>
+    feature.toString();
 
   if (datasetError && error) {
     return (
@@ -164,7 +164,7 @@ export const VisualizationArea: React.FC = () => {
             >
               {availableFeatures.map((feature) => (
                 <MenuItem key={feature} value={feature}>
-                  {feature}
+                  {formatFeatureLabel(feature)}
                 </MenuItem>
               ))}
             </Select>
@@ -188,7 +188,7 @@ export const VisualizationArea: React.FC = () => {
               >
                 {availableFeatures.map((feature) => (
                   <MenuItem key={feature} value={feature}>
-                    {feature}
+                    {formatFeatureLabel(feature)}
                   </MenuItem>
                 ))}
               </Select>
@@ -208,7 +208,7 @@ export const VisualizationArea: React.FC = () => {
               >
                 {availableFeatures.map((feature) => (
                   <MenuItem key={feature} value={feature}>
-                    {feature}
+                    {formatFeatureLabel(feature)}
                   </MenuItem>
                 ))}
               </Select>
@@ -251,18 +251,21 @@ export const VisualizationArea: React.FC = () => {
               animation="wave"
               width="90%"
               height="16%"
+              sx={{ maxWidth: 520 }}
             />
             <Skeleton
               variant="rounded"
               animation="wave"
               width="95%"
               height="50%"
+              sx={{ maxWidth: 620 }}
             />
             <Skeleton
               variant="rounded"
               animation="wave"
               width="70%"
               height="10%"
+              sx={{ maxWidth: 460 }}
             />
           </Box>
         </Fade>
@@ -289,7 +292,7 @@ export const VisualizationArea: React.FC = () => {
         )}
 
         <Fade
-          in={!showSkeleton && !datasetError}
+          in={!isFiltering && !showSkeleton && !datasetError}
           timeout={{ enter: 200, exit: 0 }}
           mountOnEnter
           unmountOnExit

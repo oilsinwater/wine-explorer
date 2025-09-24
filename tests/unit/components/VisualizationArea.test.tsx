@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { VisualizationArea } from '../../../src/components/visualizations/VisualizationArea';
 import { WineDataContext } from '../../../src/context/WineDataContext';
 import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
@@ -75,8 +75,110 @@ const renderWithContext = (contextValue = baseContext) => {
 };
 
 describe('VisualizationArea', () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  const mockContext = {
+    wineData: mockWineData,
+    filteredData: mockWineData,
+    currentDataset: 'red' as WineDataSet,
+    loading: false,
+    error: null,
+    switchDataset: vi.fn(),
+    filters: {
+      alcohol: { min: 8.0, max: 14.0 },
+      pH: { min: 2.7, max: 4.0 },
+      volatileAcidity: { min: 0.1, max: 1.2 },
+    },
+    updateFilters: vi.fn(),
+    clearFilters: vi.fn(),
+    featureRanges: {
+      alcohol: { min: 8.0, max: 14.0 },
+      pH: { min: 2.7, max: 4.0 },
+      volatileAcidity: { min: 0.1, max: 1.2 },
+    },
+  };
+
+  it('shows visualization skeleton with delayed appearance while loading', () => {
+    vi.useFakeTimers();
+    render(
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'loading', loading: true }}
+      >
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    expect(
+      screen.queryByTestId('visualization-skeleton')
+    ).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
+  it('keeps skeleton visible for minimum duration before hiding', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'loading', loading: true }}
+      >
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    rerender(
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'ready', loading: false }}
+      >
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+
+    // Should remain visible until minimum display time (300ms) elapsed
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(120);
+    });
+    expect(screen.getByTestId('visualization-skeleton').style.opacity).toBe(
+      '0'
+    );
+
+    vi.useRealTimers();
+  });
+
+  it('renders error state', () => {
+    const mockError = {
+      title: 'Dataset Error',
+      description: 'Failed to load dataset',
+      retryable: true,
+    };
+    render(
+      <WineDataContext.Provider
+        value={{ ...baseContext, loadStatus: 'error', error: mockError }}
+      >
+        <VisualizationArea />
+      </WineDataContext.Provider>
+    );
+    expect(screen.getByText(/Failed to load dataset/i)).toBeInTheDocument();
   });
 
   it('renders HistogramPlot by default', () => {
