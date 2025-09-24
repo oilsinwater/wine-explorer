@@ -29,13 +29,17 @@ const mockContext = {
   wineData: [] as WineDataPoint[],
   filteredData: [] as WineDataPoint[],
   currentDataset: 'red' as WineDataSet,
+  loadStatus: 'ready' as const,
   loading: false,
+  isFiltering: false,
   error: null,
   filters: mockFilters,
   featureRanges: mockFeatureRanges,
   switchDataset: vi.fn(),
   updateFilters: vi.fn(),
   clearFilters: vi.fn(),
+  retryLoad: vi.fn(),
+  lastLoadedAt: null as number | null,
 };
 
 const renderWithContext = () => {
@@ -83,17 +87,66 @@ describe('FilterPanel', () => {
   });
 
   it('disables buttons when loading', () => {
-    const loadingContext = Object.assign({}, mockContext, {
-      loading: true,
-    });
-
     render(
-      <WineDataContext.Provider value={loadingContext}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loading: true, loadStatus: 'loading' }}
+      >
         <FilterPanel />
       </WineDataContext.Provider>
     );
 
     const clearButton = screen.getByText('Clear All');
     expect(clearButton).toBeDisabled();
+  });
+
+  it('shows filtering indicator when filters are updating', () => {
+    render(
+      <WineDataContext.Provider value={{ ...mockContext, isFiltering: true }}>
+        <FilterPanel />
+      </WineDataContext.Provider>
+    );
+
+    expect(screen.getByText('Updating...')).toBeInTheDocument();
+  });
+
+  it('renders loading state while dataset is loading', () => {
+    render(
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'loading', loading: true }}
+      >
+        <FilterPanel />
+      </WineDataContext.Provider>
+    );
+
+    expect(screen.getByText('Clear All')).toBeDisabled();
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+  });
+
+  it('shows retry message when dataset fails to load', () => {
+    const error = {
+      title: 'Unable to load dataset',
+      description: 'Network issue',
+      retryable: true,
+    };
+
+    const retry = vi.fn();
+    render(
+      <WineDataContext.Provider
+        value={{
+          ...mockContext,
+          loadStatus: 'error',
+          error,
+          retryLoad: retry,
+        }}
+      >
+        <FilterPanel />
+      </WineDataContext.Provider>
+    );
+
+    expect(screen.getByText(/Network issue/i)).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', { name: /Try loading data again/i })
+    );
+    expect(retry).toHaveBeenCalled();
   });
 });

@@ -1,7 +1,9 @@
-import { Box, Container, Stack, styled } from '@mui/material';
+import { Box, Container, Grid, styled } from '@mui/material';
 import { createFileRoute } from '@tanstack/react-router';
 import { DatasetSelector } from '../components/DatasetSelector';
 import { InfoPanel } from '../components/InfoPanel';
+import { VisualizationArea } from '../components/visualizations/VisualizationArea';
+import { FilterPanel } from '../components/FilterPanel';
 
 export const Route = createFileRoute('/wine-explorer')({
   component: WineExplorer,
@@ -25,38 +27,26 @@ function WineExplorer() {
     marginBottom: theme.spacing(3),
   }));
 
+  const StyledFilterPanel = styled(FilterPanel)(({ theme }) => ({
+    marginBottom: theme.spacing(3),
+  }));
+
   return (
     <StyledContainer maxWidth="lg">
-      <Stack spacing={3}>
-        <StyledDatasetSelector />
-        <StyledInfoPanel />
-        <Box
-          sx={{
-            height: '400px',
-            backgroundColor: 'grey.100',
-            border: '1px dashed',
-            borderColor: 'grey.300',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Box textAlign="center">
-            <Box component="span" sx={{ fontSize: '3rem', display: 'block' }}>
-              📊
-            </Box>
-            <Box
-              component="span"
-              sx={{ fontSize: '1.5rem', fontWeight: 'bold' }}
-            >
-              Visualization Area
-            </Box>
-            <Box component="p" sx={{ color: 'grey.600' }}>
-              Charts and graphs will be displayed here
-            </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <StyledDatasetSelector />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <StyledFilterPanel />
+          <StyledInfoPanel />
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Box sx={{ height: '600px', width: '100%' }}>
+            <VisualizationArea />
           </Box>
-        </Box>
-      </Stack>
+        </Grid>
+      </Grid>
     </StyledContainer>
   );
 }
