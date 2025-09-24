@@ -1,5 +1,6 @@
 import { csv } from 'd3-fetch';
 import { WineDataPoint, WineDataSet } from '../types/wine';
+import { DatasetLoadError, DatasetErrorCode } from './errors';
 
 // Define the filter criteria type
 export interface FilterCriteria {
@@ -16,25 +17,65 @@ class WineDataManager {
       return this.dataCache.get(dataSet)!;
     }
 
-    const data = await csv(`/data/winequality-${dataSet}.csv`, (d) => {
-      return {
-        'fixed acidity': +d['fixed acidity']!,
-        'volatile acidity': +d['volatile acidity']!,
-        'citric acid': +d['citric acid']!,
-        'residual sugar': +d['residual sugar']!,
-        chlorides: +d.chlorides!,
-        'free sulfur dioxide': +d['free sulfur dioxide']!,
-        'total sulfur dioxide': +d['total sulfur dioxide']!,
-        density: +d.density!,
-        pH: +d.pH!,
-        sulphates: +d.sulphates!,
-        alcohol: +d.alcohol!,
-        quality: +d.quality!,
-      } as WineDataPoint;
-    });
+    try {
+      const raw = await csv(`/data/winequality-${dataSet}.csv`);
 
-    this.dataCache.set(dataSet, data);
-    return data;
+      if (!raw || raw.length === 0) {
+        throw new DatasetLoadError({
+          code: 'EMPTY_DATASET',
+          dataset: dataSet,
+          message: `No records found for ${dataSet} dataset.`,
+          retryable: false,
+        });
+      }
+
+      const data = raw.map((d, index) => {
+        const parseNumber = (key: string): number => {
+          const value = d[key];
+          const parsed = Number.parseFloat(value ?? '');
+          if (!Number.isFinite(parsed)) {
+            throw new DatasetLoadError({
+              code: 'PARSE_ERROR',
+              dataset: dataSet,
+              message: `Invalid value for “${key}” on row ${index + 1}.`,
+              retryable: false,
+              context: { key, value, row: index + 1 },
+            });
+          }
+          return parsed;
+        };
+
+        return {
+          'fixed acidity': parseNumber('fixed acidity'),
+          'volatile acidity': parseNumber('volatile acidity'),
+          'citric acid': parseNumber('citric acid'),
+          'residual sugar': parseNumber('residual sugar'),
+          chlorides: parseNumber('chlorides'),
+          'free sulfur dioxide': parseNumber('free sulfur dioxide'),
+          'total sulfur dioxide': parseNumber('total sulfur dioxide'),
+          density: parseNumber('density'),
+          pH: parseNumber('pH'),
+          sulphates: parseNumber('sulphates'),
+          alcohol: parseNumber('alcohol'),
+          quality: parseNumber('quality'),
+        } as WineDataPoint;
+      });
+
+      this.dataCache.set(dataSet, data);
+      return data;
+    } catch (error) {
+      if (error instanceof DatasetLoadError) {
+        throw error;
+      }
+
+      const code = deriveDatasetErrorCode(error);
+      throw new DatasetLoadError({
+        code,
+        dataset: dataSet,
+        cause: error,
+        message: createFriendlyMessage(code, dataSet),
+      });
+    }
   }
 
   // Apply filters to the wine data
@@ -87,3 +128,35 @@ class WineDataManager {
 }
 
 export const wineDataManager = new WineDataManager();
+
+function deriveDatasetErrorCode(error: unknown): DatasetErrorCode {
+  if (error instanceof DatasetLoadError) {
+    return error.code;
+  }
+
+  const message = error instanceof Error ? error.message : `${error}`;
+
+  if (message.includes('404')) {
+    return 'FILE_NOT_FOUND';
+  }
+  if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+    return 'NETWORK_ERROR';
+  }
+
+  return 'UNKNOWN';
+}
+
+function createFriendlyMessage(code: DatasetErrorCode, dataset: WineDataSet) {
+  switch (code) {
+    case 'FILE_NOT_FOUND':
+      return `We couldn't find the ${dataset} wine dataset.`;
+    case 'NETWORK_ERROR':
+      return `Network issue while loading the ${dataset} wine dataset.`;
+    case 'PARSE_ERROR':
+      return `The ${dataset} wine dataset contains unexpected values.`;
+    case 'EMPTY_DATASET':
+      return `No data available for the ${dataset} wine dataset.`;
+    default:
+      return `Something went wrong while loading the ${dataset} wine dataset.`;
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import {
   ToggleButton,
   ToggleButtonGroup,
@@ -7,9 +7,10 @@ import {
   CircularProgress,
   Alert,
   Button,
+  Skeleton,
 } from '@mui/material';
 import { WineDataContext } from '../context/WineDataContext';
-import { useEffect } from 'react';
+import { useDelayedVisibility } from '../hooks/useDelayedVisibility';
 
 export interface DatasetSelectorProps {
   className?: string;
@@ -27,22 +28,52 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     return <div>Loading...</div>; // Or some other fallback UI
   }
 
-  const { currentDataset, switchDataset, loading, error } = context;
+  const {
+    currentDataset,
+    switchDataset,
+    loading,
+    loadStatus,
+    error,
+    retryLoad,
+    lastLoadedAt,
+  } = context;
+
+  const announcementRef = useRef<HTMLDivElement | null>(null);
+  const errorAlertRef = useRef<HTMLDivElement | null>(null);
+  const showSpinner = useDelayedVisibility(loading, {
+    enterDelayMs: 100,
+    minVisibleMs: 300,
+  });
+
+  const datasetMeta = useMemo(() => {
+    return currentDataset === 'red'
+      ? { label: 'Red', count: 1599 }
+      : { label: 'White', count: 4898 };
+  }, [currentDataset]);
 
   useEffect(() => {
-    const announcementDiv = document.getElementById(
-      'screen-reader-announcement'
-    );
-    if (announcementDiv) {
-      if (loading) {
-        announcementDiv.textContent = `Switching to ${currentDataset} wine dataset. Loading ${currentDataset === 'red' ? '1,599' : '4,898'} instances.`;
-      } else if (error) {
-        announcementDiv.textContent = `Error loading ${currentDataset} wine dataset.`;
-      } else {
-        announcementDiv.textContent = `${currentDataset} wine dataset loaded.`;
-      }
+    const node = announcementRef.current;
+    if (!node) {
+      return;
     }
-  }, [loading, currentDataset, error]);
+
+    if (loading) {
+      node.textContent = `Loading ${datasetMeta.label.toLowerCase()} wine dataset. ${datasetMeta.count.toLocaleString()} instances.`;
+    } else if (loadStatus === 'error' && error) {
+      node.textContent = `Error loading ${datasetMeta.label.toLowerCase()} wine dataset. ${error.description}`;
+    } else if (loadStatus === 'ready') {
+      const loadedPrefix = lastLoadedAt
+        ? new Date(lastLoadedAt).toLocaleTimeString()
+        : 'now';
+      node.textContent = `${datasetMeta.label} wine dataset ready as of ${loadedPrefix}.`;
+    }
+  }, [loading, loadStatus, currentDataset, datasetMeta, error, lastLoadedAt]);
+
+  useEffect(() => {
+    if (loadStatus === 'error' && errorAlertRef.current) {
+      errorAlertRef.current.focus();
+    }
+  }, [loadStatus]);
 
   const handleDatasetChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -58,23 +89,32 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       <Typography variant="subtitle2" component="h3">
         Dataset
       </Typography>
-      {loading ? (
-        <CircularProgress size={24} />
-      ) : error ? (
+      {showSpinner ? (
+        <CircularProgress size={24} aria-live="polite" />
+      ) : loadStatus === 'error' && error ? (
         <Alert
+          ref={errorAlertRef}
+          tabIndex={-1}
           severity="error"
+          role="alert"
           action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={() => switchDataset(currentDataset)}
-            >
-              Retry
-            </Button>
+            error.retryable ? (
+              <Button color="inherit" size="small" onClick={retryLoad}>
+                Retry
+              </Button>
+            ) : undefined
           }
+          sx={{ alignItems: 'flex-start' }}
         >
-          Error loading data. Please try again.
+          <Typography component="span" variant="subtitle2" display="block">
+            {error.title}
+          </Typography>
+          <Typography component="span" variant="body2">
+            {error.description}
+          </Typography>
         </Alert>
+      ) : loadStatus === 'loading' ? (
+        <Skeleton variant="rounded" height={36} width={220} />
       ) : (
         <ToggleButtonGroup
           value={currentDataset}
@@ -120,6 +160,7 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
         aria-live="polite"
         data-testid="screen-reader-announcement-region"
         style={{ position: 'absolute', left: '-10000px' }}
+        ref={announcementRef}
       />
     </Stack>
   );

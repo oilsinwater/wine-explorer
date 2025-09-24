@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import {
   Box,
   CircularProgress,
@@ -12,11 +12,14 @@ import {
   Stack,
   Fade,
   Skeleton,
+  Alert,
+  Button,
 } from '@mui/material';
 import { WineDataContext } from '../../context/WineDataContext';
 import { HistogramPlot } from './HistogramPlot';
 import { ScatterPlot } from './ScatterPlot';
 import { WineDataPoint } from '../../types/wine';
+import { useDelayedVisibility } from '../../hooks/useDelayedVisibility';
 
 export const VisualizationArea: React.FC = () => {
   const context = useContext(WineDataContext);
@@ -32,7 +35,18 @@ export const VisualizationArea: React.FC = () => {
     return <CircularProgress />;
   }
 
-  const { filteredData, loading, error, isFiltering } = context;
+  const { filteredData, loading, error, isFiltering, loadStatus, retryLoad } =
+    context;
+
+  const showSkeleton = useDelayedVisibility(loadStatus === 'loading', {
+    enterDelayMs: 100,
+    minVisibleMs: 300,
+  });
+
+  const datasetError = loadStatus === 'error' && error;
+  const datasetReady = loadStatus === 'ready';
+  const datasetEmpty = datasetReady && filteredData.length === 0;
+  const controlsDisabled = !datasetReady || loading;
 
   const availableFeatures = useMemo(() => {
     if (!filteredData || filteredData.length === 0) {
@@ -48,80 +62,24 @@ export const VisualizationArea: React.FC = () => {
 
   // Ensure selected feature is valid for the current dataset
   useEffect(() => {
-    if (
-      !availableFeatures.includes(selectedXFeature) &&
-      availableFeatures.length
-    ) {
+    if (availableFeatures.length === 0) {
+      return;
+    }
+
+    if (!availableFeatures.includes(selectedXFeature)) {
       setSelectedXFeature(availableFeatures[0]);
     }
   }, [availableFeatures, selectedXFeature]);
 
   useEffect(() => {
-    if (
-      !availableFeatures.includes(selectedYFeature) &&
-      availableFeatures.length
-    ) {
+    if (availableFeatures.length === 0) {
+      return;
+    }
+
+    if (!availableFeatures.includes(selectedYFeature)) {
       setSelectedYFeature(availableFeatures[0]);
     }
   }, [availableFeatures, selectedYFeature]);
-
-  const skeletonDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const skeletonHideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const skeletonStartRef = useRef<number | null>(null);
-  const [showSkeleton, setShowSkeleton] = useState(false);
-
-  useEffect(() => {
-    if (loading) {
-      if (skeletonHideRef.current) {
-        clearTimeout(skeletonHideRef.current);
-        skeletonHideRef.current = null;
-      }
-
-      if (showSkeleton) {
-        return;
-      }
-
-      skeletonDelayRef.current = setTimeout(() => {
-        skeletonStartRef.current =
-          typeof performance !== 'undefined' ? performance.now() : Date.now();
-        setShowSkeleton(true);
-      }, 100);
-    } else {
-      if (skeletonDelayRef.current) {
-        clearTimeout(skeletonDelayRef.current);
-        skeletonDelayRef.current = null;
-      }
-
-      if (!showSkeleton) {
-        skeletonStartRef.current = null;
-        return;
-      }
-
-      const startedAt =
-        skeletonStartRef.current ??
-        (typeof performance !== 'undefined' ? performance.now() : Date.now());
-      const elapsed =
-        (typeof performance !== 'undefined' ? performance.now() : Date.now()) -
-        startedAt;
-      const remaining = Math.max(0, 300 - elapsed);
-
-      skeletonHideRef.current = setTimeout(() => {
-        skeletonStartRef.current = null;
-        setShowSkeleton(false);
-      }, remaining);
-    }
-
-    return () => {
-      if (skeletonDelayRef.current) {
-        clearTimeout(skeletonDelayRef.current);
-        skeletonDelayRef.current = null;
-      }
-      if (skeletonHideRef.current) {
-        clearTimeout(skeletonHideRef.current);
-        skeletonHideRef.current = null;
-      }
-    };
-  }, [loading, showSkeleton]);
 
   const handleVisualizationChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -136,29 +94,38 @@ export const VisualizationArea: React.FC = () => {
     setSelectedXFeature(event.target.value as keyof WineDataPoint);
   };
 
-  const handleYFeatureChange = (event: any) => {
-    setSelectedYFeature(event.target.value as keyof WineDataPoint);
-  };
-
-  const isDatasetEmpty = !loading && filteredData && filteredData.length === 0;
-
   const formatFeatureLabel = (feature: keyof WineDataPoint) =>
     feature.toString();
 
-  if (error) {
+  if (datasetError && error) {
     return (
       <Box
         sx={{
-          height: '400px',
+          width: '100%',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          flexDirection: 'column',
-          color: 'error.main',
         }}
       >
-        <Typography variant="h6">Error loading data:</Typography>
-        <Typography variant="body1">{error.message}</Typography>
+        <Alert
+          severity="error"
+          role="alert"
+          action={
+            error.retryable ? (
+              <Button color="inherit" size="small" onClick={retryLoad}>
+                Retry
+              </Button>
+            ) : undefined
+          }
+        >
+          <Typography variant="subtitle2" component="div">
+            {error.title}
+          </Typography>
+          <Typography variant="body2" component="div">
+            {error.description}
+          </Typography>
+        </Alert>
       </Box>
     );
   }
@@ -171,7 +138,7 @@ export const VisualizationArea: React.FC = () => {
           exclusive
           onChange={handleVisualizationChange}
           aria-label="visualization type"
-          disabled={loading}
+          disabled={controlsDisabled}
         >
           <ToggleButton value="histogram" aria-label="histogram">
             Histogram
@@ -182,7 +149,7 @@ export const VisualizationArea: React.FC = () => {
         </ToggleButtonGroup>
 
         {selectedVisualization === 'histogram' && (
-          <FormControl sx={{ minWidth: 120 }} size="small">
+          <FormControl sx={{ minWidth: 140 }} size="small">
             <InputLabel id="select-feature-label">Feature</InputLabel>
             <Select
               labelId="select-feature-label"
@@ -193,7 +160,7 @@ export const VisualizationArea: React.FC = () => {
               }
               label="Feature"
               onChange={handleXFeatureChange}
-              disabled={loading || availableFeatures.length === 0}
+              disabled={controlsDisabled || availableFeatures.length === 0}
             >
               {availableFeatures.map((feature) => (
                 <MenuItem key={feature} value={feature}>
@@ -206,7 +173,7 @@ export const VisualizationArea: React.FC = () => {
 
         {selectedVisualization === 'scatterplot' && (
           <>
-            <FormControl sx={{ minWidth: 120 }} size="small">
+            <FormControl sx={{ minWidth: 140 }} size="small">
               <InputLabel id="select-x-feature-label">X-Axis</InputLabel>
               <Select
                 labelId="select-x-feature-label"
@@ -217,7 +184,7 @@ export const VisualizationArea: React.FC = () => {
                 }
                 label="X-Axis"
                 onChange={handleXFeatureChange}
-                disabled={loading || availableFeatures.length === 0}
+                disabled={controlsDisabled || availableFeatures.length === 0}
               >
                 {availableFeatures.map((feature) => (
                   <MenuItem key={feature} value={feature}>
@@ -226,7 +193,7 @@ export const VisualizationArea: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <FormControl sx={{ minWidth: 120 }} size="small">
+            <FormControl sx={{ minWidth: 140 }} size="small">
               <InputLabel id="select-y-feature-label">Y-Axis</InputLabel>
               <Select
                 labelId="select-y-feature-label"
@@ -237,7 +204,7 @@ export const VisualizationArea: React.FC = () => {
                 }
                 label="Y-Axis"
                 onChange={handleYFeatureChange}
-                disabled={loading || availableFeatures.length === 0}
+                disabled={controlsDisabled || availableFeatures.length === 0}
               >
                 {availableFeatures.map((feature) => (
                   <MenuItem key={feature} value={feature}>
@@ -323,14 +290,15 @@ export const VisualizationArea: React.FC = () => {
             </Typography>
           </Box>
         )}
+
         <Fade
-          in={!isFiltering && !showSkeleton}
+          in={!isFiltering && !showSkeleton && !datasetError}
           timeout={{ enter: 200, exit: 0 }}
           mountOnEnter
           unmountOnExit
         >
           <Box sx={{ height: '100%', width: '100%' }}>
-            {isDatasetEmpty ? (
+            {datasetEmpty ? (
               <Box
                 sx={{
                   height: '100%',
@@ -349,12 +317,12 @@ export const VisualizationArea: React.FC = () => {
               </Box>
             ) : selectedVisualization === 'histogram' ? (
               <HistogramPlot
-                data={filteredData || []}
+                data={datasetReady ? filteredData : []}
                 feature={selectedXFeature}
               />
             ) : (
               <ScatterPlot
-                data={filteredData || []}
+                data={datasetReady ? filteredData : []}
                 xFeature={selectedXFeature}
                 yFeature={selectedYFeature}
               />

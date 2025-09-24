@@ -41,10 +41,11 @@ const mockWineData: WineDataPoint[] = [
   },
 ];
 
-const mockContext = {
+const baseContext = {
   wineData: mockWineData,
   filteredData: mockWineData,
   currentDataset: 'red' as WineDataSet,
+  loadStatus: 'ready' as const,
   loading: false,
   isFiltering: false,
   error: null,
@@ -61,6 +62,16 @@ const mockContext = {
     pH: { min: 2.7, max: 4.0 },
     volatileAcidity: { min: 0.1, max: 1.2 },
   },
+  retryLoad: vi.fn(),
+  lastLoadedAt: null,
+};
+
+const renderWithContext = (contextValue = baseContext) => {
+  return render(
+    <WineDataContext.Provider value={contextValue as any}>
+      <VisualizationArea />
+    </WineDataContext.Provider>
+  );
 };
 
 describe('VisualizationArea', () => {
@@ -72,10 +83,33 @@ describe('VisualizationArea', () => {
     vi.useRealTimers();
   });
 
+  const mockContext = {
+    wineData: mockWineData,
+    filteredData: mockWineData,
+    currentDataset: 'red' as WineDataSet,
+    loading: false,
+    error: null,
+    switchDataset: vi.fn(),
+    filters: {
+      alcohol: { min: 8.0, max: 14.0 },
+      pH: { min: 2.7, max: 4.0 },
+      volatileAcidity: { min: 0.1, max: 1.2 },
+    },
+    updateFilters: vi.fn(),
+    clearFilters: vi.fn(),
+    featureRanges: {
+      alcohol: { min: 8.0, max: 14.0 },
+      pH: { min: 2.7, max: 4.0 },
+      volatileAcidity: { min: 0.1, max: 1.2 },
+    },
+  };
+
   it('shows visualization skeleton with delayed appearance while loading', () => {
     vi.useFakeTimers();
     render(
-      <WineDataContext.Provider value={{ ...mockContext, loading: true }}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'loading', loading: true }}
+      >
         <VisualizationArea />
       </WineDataContext.Provider>
     );
@@ -95,7 +129,9 @@ describe('VisualizationArea', () => {
   it('keeps skeleton visible for minimum duration before hiding', () => {
     vi.useFakeTimers();
     const { rerender } = render(
-      <WineDataContext.Provider value={{ ...mockContext, loading: true }}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'loading', loading: true }}
+      >
         <VisualizationArea />
       </WineDataContext.Provider>
     );
@@ -106,7 +142,9 @@ describe('VisualizationArea', () => {
     expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
 
     rerender(
-      <WineDataContext.Provider value={{ ...mockContext, loading: false }}>
+      <WineDataContext.Provider
+        value={{ ...mockContext, loadStatus: 'ready', loading: false }}
+      >
         <VisualizationArea />
       </WineDataContext.Provider>
     );
@@ -128,85 +166,84 @@ describe('VisualizationArea', () => {
   });
 
   it('renders error state', () => {
-    const mockError = new Error('Failed to fetch data');
+    const mockError = {
+      title: 'Dataset Error',
+      description: 'Failed to load dataset',
+      retryable: true,
+    };
     render(
-      <WineDataContext.Provider value={{ ...mockContext, error: mockError }}>
+      <WineDataContext.Provider
+        value={{ ...baseContext, loadStatus: 'error', error: mockError }}
+      >
         <VisualizationArea />
       </WineDataContext.Provider>
     );
-    expect(screen.getByText(/error loading data/i)).toBeInTheDocument();
-    expect(screen.getByText(/failed to fetch data/i)).toBeInTheDocument();
+    expect(screen.getByText(/Failed to load dataset/i)).toBeInTheDocument();
   });
 
   it('renders HistogramPlot by default', () => {
-    render(
-      <WineDataContext.Provider value={mockContext}>
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
+    renderWithContext();
+
     expect(screen.getByTestId('mock-plot')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /histogram/i })).toHaveClass(
       'Mui-selected'
     );
   });
 
+  it('renders error message when dataset load fails', () => {
+    const normalizedError = {
+      title: 'Unable to load dataset',
+      description: 'Network issue',
+      retryable: true,
+    };
+
+    renderWithContext({
+      ...baseContext,
+      loadStatus: 'error',
+      error: normalizedError,
+    });
+
+    expect(screen.getByText(/Network issue/i)).toBeInTheDocument();
+  });
+
+  it('displays skeleton while dataset loading', () => {
+    vi.useFakeTimers();
+
+    renderWithContext({
+      ...baseContext,
+      loadStatus: 'loading',
+      loading: true,
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+
+    expect(screen.getByTestId('visualization-skeleton')).toBeInTheDocument();
+  });
+
   it('switches to ScatterPlot when selected', () => {
-    render(
-      <WineDataContext.Provider value={mockContext}>
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
+    renderWithContext();
+
     fireEvent.click(screen.getByRole('button', { name: /scatterplot/i }));
+
     expect(screen.getByRole('button', { name: /scatterplot/i })).toHaveClass(
       'Mui-selected'
     );
     expect(screen.getByTestId('mock-plot')).toBeInTheDocument();
   });
 
-  it('allows changing feature for Histogram', () => {
-    render(
-      <WineDataContext.Provider value={mockContext}>
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
-    // Skip this test for now as it's complex to mock the select options
-    expect(
-      screen.getByRole('button', { name: /histogram/i })
-    ).toBeInTheDocument();
-  });
-
-  it('allows changing x and y features for ScatterPlot', () => {
-    render(
-      <WineDataContext.Provider value={mockContext}>
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
-    fireEvent.click(screen.getByRole('button', { name: /scatterplot/i }));
-
-    // Skip this test for now as it's complex to mock the select options
-    expect(
-      screen.getByRole('button', { name: /scatterplot/i })
-    ).toBeInTheDocument();
-  });
-
   it('shows visualization loading overlay while filtering', () => {
-    render(
-      <WineDataContext.Provider value={{ ...mockContext, isFiltering: true }}>
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
+    renderWithContext({ ...baseContext, isFiltering: true });
 
     expect(screen.getByText('Updating visualization...')).toBeInTheDocument();
   });
 
-  it('shows empty state message when no filtered results', () => {
-    render(
-      <WineDataContext.Provider
-        value={{ ...mockContext, filteredData: [], loading: false }}
-      >
-        <VisualizationArea />
-      </WineDataContext.Provider>
-    );
+  it('shows empty state when no data matches filters', () => {
+    renderWithContext({
+      ...baseContext,
+      filteredData: [],
+    });
 
     expect(
       screen.getByText(/No records match the current filters/i)

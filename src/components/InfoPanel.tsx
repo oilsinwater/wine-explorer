@@ -6,6 +6,9 @@ import {
   Stack,
   Box,
   CircularProgress,
+  Skeleton,
+  Alert,
+  Button,
 } from '@mui/material';
 import { WineDataContext } from '../context/WineDataContext';
 
@@ -69,9 +72,11 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
     currentDataset,
     wineData,
     filteredData,
-    loading,
+    loadStatus,
     error,
     isFiltering,
+    retryLoad,
+    lastLoadedAt,
   } = context;
   const currentDatasetInfo = datasetInfo[currentDataset];
   const filteredCount = filteredData.length;
@@ -90,12 +95,31 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
         <Typography variant="h6" component="h3" gutterBottom>
           Dataset Information
         </Typography>
-        {loading ? (
-          <CircularProgress />
-        ) : error ? (
-          <Typography variant="body2" color="error">
-            Error loading dataset information.
-          </Typography>
+        {loadStatus === 'loading' ? (
+          <Stack spacing={1} aria-live="polite">
+            <Skeleton variant="text" width="60%" height={24} />
+            <Skeleton variant="text" width="50%" height={20} />
+            <Skeleton variant="text" width="80%" height={20} />
+          </Stack>
+        ) : loadStatus === 'error' && error ? (
+          <Alert
+            severity="error"
+            role="alert"
+            action={
+              error.retryable ? (
+                <Button color="inherit" size="small" onClick={retryLoad}>
+                  Retry
+                </Button>
+              ) : undefined
+            }
+          >
+            <Typography variant="subtitle2" component="div">
+              {error.title}
+            </Typography>
+            <Typography variant="body2" component="div">
+              {error.description}
+            </Typography>
+          </Alert>
         ) : (
           <Stack spacing={1}>
             <Box>
@@ -135,6 +159,11 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
                 </Box>
               )}
             </Box>
+            {lastLoadedAt && (
+              <Typography variant="caption" color="text.secondary">
+                Updated {new Date(lastLoadedAt).toLocaleTimeString()}
+              </Typography>
+            )}
           </Stack>
         )}
       </CardContent>

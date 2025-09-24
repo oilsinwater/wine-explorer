@@ -8,24 +8,45 @@ import React, {
 } from 'react';
 import { WineDataPoint, WineDataSet } from '../types/wine';
 import { wineDataManager, FilterCriteria } from '../utils/WineDataManager';
+import {
+  DatasetLoadError,
+  NormalizedAppError,
+  toNormalizedError,
+} from '../utils/errors';
+import { errorLogger } from '../utils/errorLogger';
 
 interface WineDataContextType {
   wineData: WineDataPoint[];
   filteredData: WineDataPoint[];
   currentDataset: WineDataSet;
+  loadStatus: 'idle' | 'loading' | 'ready' | 'error';
   loading: boolean;
   isFiltering: boolean;
-  error: Error | null;
+  error: NormalizedAppError | null;
   filters: FilterCriteria;
   switchDataset: (dataSet: WineDataSet) => void;
   updateFilters: (newFilters: Partial<FilterCriteria>) => void;
   clearFilters: () => void;
   featureRanges: FilterCriteria;
+  retryLoad: () => void;
+  lastLoadedAt: number | null;
 }
 
 export const WineDataContext = createContext<WineDataContextType | undefined>(
   undefined
 );
+
+const DEFAULT_FILTERS: FilterCriteria = {
+  alcohol: { min: 8.0, max: 14.0 },
+  pH: { min: 2.7, max: 4.0 },
+  volatileAcidity: { min: 0.1, max: 1.2 },
+};
+
+const cloneFilters = (filters: FilterCriteria): FilterCriteria => ({
+  alcohol: { ...filters.alcohol },
+  pH: { ...filters.pH },
+  volatileAcidity: { ...filters.volatileAcidity },
+});
 
 export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -33,19 +54,20 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
   const [wineData, setWineData] = useState<WineDataPoint[]>([]);
   const [filteredData, setFilteredData] = useState<WineDataPoint[]>([]);
   const [currentDataset, setCurrentDataset] = useState<WineDataSet>('red');
-  const [loading, setLoading] = useState(true);
+  const [loadStatus, setLoadStatus] = useState<
+    'idle' | 'loading' | 'ready' | 'error'
+  >('loading');
   const [isFiltering, setIsFiltering] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [filters, setFilters] = useState<FilterCriteria>({
-    alcohol: { min: 8.0, max: 14.0 },
-    pH: { min: 2.7, max: 4.0 },
-    volatileAcidity: { min: 0.1, max: 1.2 },
-  });
-  const [featureRanges, setFeatureRanges] = useState<FilterCriteria>({
-    alcohol: { min: 8.0, max: 14.0 },
-    pH: { min: 2.7, max: 4.0 },
-    volatileAcidity: { min: 0.1, max: 1.2 },
-  });
+  const [errorDetails, setErrorDetails] = useState<NormalizedAppError | null>(
+    null
+  );
+  const [filters, setFilters] = useState<FilterCriteria>(
+    cloneFilters(DEFAULT_FILTERS)
+  );
+  const [featureRanges, setFeatureRanges] = useState<FilterCriteria>(
+    cloneFilters(DEFAULT_FILTERS)
+  );
+  const [lastLoadedAt, setLastLoadedAt] = useState<number | null>(null);
 
   const filterQueryKeys = useMemo(
     () => ({
@@ -157,33 +179,71 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
     [filterQueryKeys]
   );
 
-  // Load data when dataset changes
-  useEffect(() => {
-    setLoading(true);
-    setIsFiltering(true);
-    wineDataManager
-      .loadData(currentDataset)
-      .then((data) => {
+  const loadDataset = useCallback(
+    async (dataset: WineDataSet) => {
+      setLoadStatus('loading');
+      setIsFiltering(true);
+      setErrorDetails(null);
+
+      try {
+        const loadWithRetry = async (
+          attempt: number
+        ): Promise<WineDataPoint[]> => {
+          try {
+            return await wineDataManager.loadData(dataset);
+          } catch (err) {
+            const datasetError =
+              err instanceof DatasetLoadError
+                ? err
+                : new DatasetLoadError({
+                    code: 'UNKNOWN',
+                    dataset,
+                    cause: err,
+                  });
+
+            if (datasetError.retryable && attempt < 3) {
+              const backoff = Math.min(500 * 2 ** (attempt - 1), 2000);
+              await new Promise((resolve) => setTimeout(resolve, backoff));
+              return loadWithRetry(attempt + 1);
+            }
+
+            throw datasetError;
+          }
+        };
+
+        const data = await loadWithRetry(1);
         setWineData(data);
-        // Update feature ranges based on the new dataset
         const ranges = wineDataManager.getFeatureRanges(data);
         setFeatureRanges(ranges);
-        // Attempt to restore filters from URL params when available
         const restoredFilters = parseFiltersFromSearch(ranges) ?? ranges;
         setFilters(restoredFilters);
         setFilteredData(wineDataManager.applyFilters(data, restoredFilters));
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err);
+        setLoadStatus('ready');
+        setLastLoadedAt(Date.now());
+      } catch (err) {
+        const datasetError = err as DatasetLoadError;
+
+        errorLogger.log(datasetError, {
+          scope: 'dataset-load',
+          dataset,
+        });
+
         setWineData([]);
         setFilteredData([]);
+        setFeatureRanges(cloneFilters(DEFAULT_FILTERS));
+        setFilters(cloneFilters(DEFAULT_FILTERS));
+        setLoadStatus('error');
         setIsFiltering(false);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [currentDataset, parseFiltersFromSearch]);
+        setErrorDetails(toNormalizedError(datasetError));
+      }
+    },
+    [parseFiltersFromSearch]
+  );
+
+  // Load data when dataset changes
+  useEffect(() => {
+    loadDataset(currentDataset);
+  }, [currentDataset, loadDataset]);
 
   // Apply filters when wineData or filters change
   useEffect(() => {
@@ -271,20 +331,29 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
     setFilters(featureRanges);
   }, [featureRanges]);
 
+  const retryLoad = useCallback(() => {
+    loadDataset(currentDataset);
+  }, [currentDataset, loadDataset]);
+
+  const loading = loadStatus === 'loading';
+
   return (
     <WineDataContext.Provider
       value={{
         wineData,
         filteredData,
         currentDataset,
+        loadStatus,
         loading,
         isFiltering,
-        error,
+        error: errorDetails,
         filters,
         switchDataset,
         updateFilters,
         clearFilters,
         featureRanges,
+        retryLoad,
+        lastLoadedAt,
       }}
     >
       {children}
