@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useId } from 'react';
 import {
   ToggleButton,
   ToggleButtonGroup,
@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { WineDataContext } from '../context/WineDataContext';
 import { useDelayedVisibility } from '../hooks/useDelayedVisibility';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 export interface DatasetSelectorProps {
   className?: string;
@@ -36,9 +37,12 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     error,
     retryLoad,
     lastLoadedAt,
+    wineData,
   } = context;
 
-  const announcementRef = useRef<HTMLDivElement | null>(null);
+  const { announce } = useAccessibility();
+  const labelId = useId();
+  const statusId = useId();
   const errorAlertRef = useRef<HTMLDivElement | null>(null);
   const showSpinner = useDelayedVisibility(loading, {
     enterDelayMs: 100,
@@ -51,23 +55,72 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       : { label: 'White', count: 4898 };
   }, [currentDataset]);
 
+  const totalInstances = wineData.length || datasetMeta.count;
+
+  const statusMessage = useMemo(() => {
+    if (loading) {
+      return `Loading ${datasetMeta.label.toLowerCase()} wine dataset. ${datasetMeta.count.toLocaleString()} instances expected.`;
+    }
+
+    if (loadStatus === 'error' && error) {
+      return `Unable to load ${datasetMeta.label.toLowerCase()} wine dataset. ${error.description}`;
+    }
+
+    if (loadStatus === 'ready') {
+      const loadedPrefix = lastLoadedAt
+        ? new Date(lastLoadedAt).toLocaleTimeString()
+        : 'now';
+      return `${datasetMeta.label} wine dataset ready as of ${loadedPrefix}. ${totalInstances.toLocaleString()} instances available.`;
+    }
+
+    return `${datasetMeta.label} wine dataset status pending.`;
+  }, [
+    datasetMeta.count,
+    datasetMeta.label,
+    error,
+    lastLoadedAt,
+    loadStatus,
+    loading,
+    totalInstances,
+  ]);
+
+  const initialRender = useRef(true);
+
   useEffect(() => {
-    const node = announcementRef.current;
-    if (!node) {
+    if (initialRender.current) {
+      initialRender.current = false;
       return;
     }
 
     if (loading) {
-      node.textContent = `Loading ${datasetMeta.label.toLowerCase()} wine dataset. ${datasetMeta.count.toLocaleString()} instances.`;
-    } else if (loadStatus === 'error' && error) {
-      node.textContent = `Error loading ${datasetMeta.label.toLowerCase()} wine dataset. ${error.description}`;
-    } else if (loadStatus === 'ready') {
-      const loadedPrefix = lastLoadedAt
-        ? new Date(lastLoadedAt).toLocaleTimeString()
-        : 'now';
-      node.textContent = `${datasetMeta.label} wine dataset ready as of ${loadedPrefix}.`;
+      announce(
+        `Switching to ${datasetMeta.label.toLowerCase()} wine dataset. ${datasetMeta.count.toLocaleString()} instances loading.`
+      );
+      return;
     }
-  }, [loading, loadStatus, currentDataset, datasetMeta, error, lastLoadedAt]);
+
+    if (loadStatus === 'error' && error) {
+      announce(
+        `Error: Unable to load ${datasetMeta.label.toLowerCase()} dataset. ${error.description}`,
+        'assertive'
+      );
+      return;
+    }
+
+    if (loadStatus === 'ready') {
+      announce(
+        `${datasetMeta.label} wine dataset loaded. ${totalInstances.toLocaleString()} instances available.`
+      );
+    }
+  }, [
+    announce,
+    datasetMeta.count,
+    datasetMeta.label,
+    error,
+    loadStatus,
+    loading,
+    totalInstances,
+  ]);
 
   useEffect(() => {
     if (loadStatus === 'error' && errorAlertRef.current) {
@@ -85,12 +138,21 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   };
 
   return (
-    <Stack spacing={1} className={className}>
-      <Typography variant="subtitle2" component="h3">
+    <Stack
+      spacing={1.5}
+      className={className}
+      role="region"
+      aria-labelledby={labelId}
+    >
+      <Typography variant="subtitle2" component="h3" id={labelId}>
         Dataset
       </Typography>
       {showSpinner ? (
-        <CircularProgress size={24} aria-live="polite" />
+        <CircularProgress
+          size={24}
+          aria-live="polite"
+          aria-label={`Loading ${datasetMeta.label.toLowerCase()} wine dataset`}
+        />
       ) : loadStatus === 'error' && error ? (
         <Alert
           ref={errorAlertRef}
@@ -114,13 +176,14 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
           </Typography>
         </Alert>
       ) : loadStatus === 'loading' ? (
-        <Skeleton variant="rounded" height={36} width={220} />
+        <Skeleton variant="rounded" height={36} width={220} aria-hidden />
       ) : (
         <ToggleButtonGroup
           value={currentDataset}
           exclusive
           onChange={handleDatasetChange}
-          aria-label="dataset selector"
+          aria-labelledby={labelId}
+          aria-describedby={statusId}
           disabled={loading}
         >
           <ToggleButton
@@ -128,10 +191,10 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
             aria-label="red wine dataset"
             sx={{
               '&.Mui-selected': {
-                backgroundColor: '#A23B72', // wine-red color
-                color: 'white',
+                backgroundColor: (theme) => theme.palette.primary.main,
+                color: (theme) => theme.palette.primary.contrastText,
                 '&:hover': {
-                  backgroundColor: '#8a3260', // slightly darker wine-red
+                  backgroundColor: (theme) => theme.palette.primary.dark,
                 },
               },
             }}
@@ -143,10 +206,10 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
             aria-label="white wine dataset"
             sx={{
               '&.Mui-selected': {
-                backgroundColor: '#F18F01', // wine-white color
-                color: 'white',
+                backgroundColor: (theme) => theme.palette.secondary.main,
+                color: (theme) => theme.palette.secondary.contrastText,
                 '&:hover': {
-                  backgroundColor: '#d98001', // slightly darker wine-white
+                  backgroundColor: (theme) => theme.palette.secondary.dark,
                 },
               },
             }}
@@ -155,13 +218,16 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
           </ToggleButton>
         </ToggleButtonGroup>
       )}
-      <div
-        id="screen-reader-announcement"
+      <Typography
+        id={statusId}
+        variant="caption"
+        component="p"
+        role="status"
         aria-live="polite"
-        data-testid="screen-reader-announcement-region"
-        style={{ position: 'absolute', left: '-10000px' }}
-        ref={announcementRef}
-      />
+        color="text.secondary"
+      >
+        {statusMessage}
+      </Typography>
     </Stack>
   );
 };

@@ -55,7 +55,7 @@ describe('ScatterPlot', () => {
       /Scatterplot showing relationship between alcohol and pH/i
     );
     expect(chart).toBeInTheDocument();
-    const summary = screen.getByText(/points plotted/i);
+    const summary = screen.getByText(/Scatter plot summary/i);
     expect(summary).toBeInTheDocument();
   });
 

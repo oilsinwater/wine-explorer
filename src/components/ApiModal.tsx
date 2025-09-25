@@ -9,12 +9,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 export const ApiModal: React.FC = () => {
   const app = useAppState();
   const [name, setName] = useState('');
   const [value, setValue] = useState('');
+  const descriptionId = useId();
 
   const handleClose = () => {
     app.dispatch(closeApiModal());
@@ -32,7 +33,7 @@ export const ApiModal: React.FC = () => {
         open={app.state.apiModalOpen}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+        aria-describedby={descriptionId}
       >
         <Paper
           sx={{
@@ -48,13 +49,14 @@ export const ApiModal: React.FC = () => {
             <Typography variant="h6" component="h2">
               API Authentication Required
             </Typography>
-            <Typography>
+            <Typography id={descriptionId} component="p">
               Enter the name of your API token (e.g. X-ApiToken) and the value
               of your API token (e.g. abc123).
             </Typography>
             <TextField
               value={name}
               label="Name"
+              autoFocus
               onChange={(event) => {
                 setName(event.target.value);
               }}

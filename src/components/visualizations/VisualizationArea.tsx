@@ -1,4 +1,11 @@
-import React, { useContext, useState, useMemo, useEffect } from 'react';
+import React, {
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+  useId,
+  useRef,
+} from 'react';
 import {
   Box,
   CircularProgress,
@@ -20,9 +27,15 @@ import { HistogramPlot } from './HistogramPlot';
 import { ScatterPlot } from './ScatterPlot';
 import { WineDataPoint } from '../../types/wine';
 import { useDelayedVisibility } from '../../hooks/useDelayedVisibility';
+import { useAccessibility } from '../../context/AccessibilityContext';
 
 export const VisualizationArea: React.FC = () => {
   const context = useContext(WineDataContext);
+  const regionLabelId = useId();
+  const descriptionId = useId();
+  const { announce } = useAccessibility();
+  const hasAnnounced = useRef(false);
+
   const [selectedVisualization, setSelectedVisualization] = useState<
     'histogram' | 'scatterplot'
   >('histogram');
@@ -35,8 +48,15 @@ export const VisualizationArea: React.FC = () => {
     return <CircularProgress />;
   }
 
-  const { filteredData, loading, error, isFiltering, loadStatus, retryLoad } =
-    context;
+  const {
+    filteredData,
+    loading,
+    error,
+    isFiltering,
+    loadStatus,
+    retryLoad,
+    currentDataset,
+  } = context;
 
   const showSkeleton = useDelayedVisibility(loadStatus === 'loading', {
     enterDelayMs: 100,
@@ -94,8 +114,74 @@ export const VisualizationArea: React.FC = () => {
     setSelectedXFeature(event.target.value as keyof WineDataPoint);
   };
 
+  const handleYFeatureChange = (event: any) => {
+    setSelectedYFeature(event.target.value as keyof WineDataPoint);
+  };
+
   const formatFeatureLabel = (feature: keyof WineDataPoint) =>
     feature.toString();
+
+  const visualizationSummary = useMemo(() => {
+    if (!datasetReady) {
+      return 'Visualization controls are disabled until the dataset finishes loading.';
+    }
+
+    if (datasetEmpty) {
+      return 'No records match the current filters. Adjust filters or switch datasets to see data visualizations.';
+    }
+
+    if (selectedVisualization === 'histogram') {
+      return `Histogram view showing ${filteredData.length.toLocaleString()} wines for the ${formatFeatureLabel(
+        selectedXFeature
+      )} feature.`;
+    }
+
+    return `Scatter plot showing ${filteredData.length.toLocaleString()} wines with ${formatFeatureLabel(
+      selectedXFeature
+    )} on the x-axis and ${formatFeatureLabel(selectedYFeature)} on the y-axis.`;
+  }, [
+    datasetEmpty,
+    datasetReady,
+    filteredData.length,
+    selectedVisualization,
+    selectedXFeature,
+    selectedYFeature,
+  ]);
+
+  useEffect(() => {
+    if (!datasetReady) {
+      return;
+    }
+
+    if (datasetEmpty) {
+      announce(
+        'No records match the current filters. Visualization area is empty.',
+        hasAnnounced.current ? 'polite' : 'assertive'
+      );
+      hasAnnounced.current = true;
+      return;
+    }
+
+    const visualizationName =
+      selectedVisualization === 'histogram' ? 'Histogram' : 'Scatter plot';
+    const detail =
+      selectedVisualization === 'histogram'
+        ? `${formatFeatureLabel(selectedXFeature)} distribution for ${filteredData.length.toLocaleString()} wines.`
+        : `${formatFeatureLabel(selectedYFeature)} plotted against ${formatFeatureLabel(
+            selectedXFeature
+          )} for ${filteredData.length.toLocaleString()} wines.`;
+
+    announce(`${visualizationName} updated. ${detail}`);
+    hasAnnounced.current = true;
+  }, [
+    announce,
+    datasetEmpty,
+    datasetReady,
+    filteredData.length,
+    selectedVisualization,
+    selectedXFeature,
+    selectedYFeature,
+  ]);
 
   if (datasetError && error) {
     return (
@@ -131,58 +217,61 @@ export const VisualizationArea: React.FC = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100%' }} aria-busy={loading}>
-      <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'center' }}>
-        <ToggleButtonGroup
-          value={selectedVisualization}
-          exclusive
-          onChange={handleVisualizationChange}
-          aria-label="visualization type"
-          disabled={controlsDisabled}
+    <Box
+      component="section"
+      role="region"
+      aria-labelledby={regionLabelId}
+      aria-describedby={descriptionId}
+      sx={{ width: '100%', height: '100%' }}
+      aria-busy={loading}
+    >
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <Typography variant="h6" component="h3" id={regionLabelId}>
+          Visualization
+        </Typography>
+        <Typography
+          variant="body2"
+          component="p"
+          color="text.secondary"
+          id={descriptionId}
+          aria-live="polite"
+          role="status"
         >
-          <ToggleButton value="histogram" aria-label="histogram">
-            Histogram
-          </ToggleButton>
-          <ToggleButton value="scatterplot" aria-label="scatterplot">
-            Scatter Plot
-          </ToggleButton>
-        </ToggleButtonGroup>
+          {datasetReady
+            ? `${visualizationSummary} Dataset: ${currentDataset} wine.`
+            : 'Dataset is preparing. Visualization controls are disabled.'}
+        </Typography>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+        >
+          <ToggleButtonGroup
+            value={selectedVisualization}
+            exclusive
+            onChange={handleVisualizationChange}
+            aria-label="Select visualization type"
+            disabled={controlsDisabled}
+          >
+            <ToggleButton value="histogram" aria-label="histogram">
+              Histogram
+            </ToggleButton>
+            <ToggleButton value="scatterplot" aria-label="scatterplot">
+              Scatter Plot
+            </ToggleButton>
+          </ToggleButtonGroup>
 
-        {selectedVisualization === 'histogram' && (
-          <FormControl sx={{ minWidth: 140 }} size="small">
-            <InputLabel id="select-feature-label">Feature</InputLabel>
-            <Select
-              labelId="select-feature-label"
-              value={
-                availableFeatures.includes(selectedXFeature)
-                  ? selectedXFeature
-                  : ''
-              }
-              label="Feature"
-              onChange={handleXFeatureChange}
-              disabled={controlsDisabled || availableFeatures.length === 0}
-            >
-              {availableFeatures.map((feature) => (
-                <MenuItem key={feature} value={feature}>
-                  {formatFeatureLabel(feature)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-
-        {selectedVisualization === 'scatterplot' && (
-          <>
-            <FormControl sx={{ minWidth: 140 }} size="small">
-              <InputLabel id="select-x-feature-label">X-Axis</InputLabel>
+          {selectedVisualization === 'histogram' && (
+            <FormControl sx={{ minWidth: 160 }} size="small">
+              <InputLabel id="select-feature-label">Feature</InputLabel>
               <Select
-                labelId="select-x-feature-label"
+                labelId="select-feature-label"
                 value={
                   availableFeatures.includes(selectedXFeature)
                     ? selectedXFeature
                     : ''
                 }
-                label="X-Axis"
+                label="Feature"
                 onChange={handleXFeatureChange}
                 disabled={controlsDisabled || availableFeatures.length === 0}
               >
@@ -193,28 +282,53 @@ export const VisualizationArea: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <FormControl sx={{ minWidth: 140 }} size="small">
-              <InputLabel id="select-y-feature-label">Y-Axis</InputLabel>
-              <Select
-                labelId="select-y-feature-label"
-                value={
-                  availableFeatures.includes(selectedYFeature)
-                    ? selectedYFeature
-                    : ''
-                }
-                label="Y-Axis"
-                onChange={handleYFeatureChange}
-                disabled={controlsDisabled || availableFeatures.length === 0}
-              >
-                {availableFeatures.map((feature) => (
-                  <MenuItem key={feature} value={feature}>
-                    {formatFeatureLabel(feature)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </>
-        )}
+          )}
+
+          {selectedVisualization === 'scatterplot' && (
+            <>
+              <FormControl sx={{ minWidth: 160 }} size="small">
+                <InputLabel id="select-x-feature-label">X-Axis</InputLabel>
+                <Select
+                  labelId="select-x-feature-label"
+                  value={
+                    availableFeatures.includes(selectedXFeature)
+                      ? selectedXFeature
+                      : ''
+                  }
+                  label="X-Axis"
+                  onChange={handleXFeatureChange}
+                  disabled={controlsDisabled || availableFeatures.length === 0}
+                >
+                  {availableFeatures.map((feature) => (
+                    <MenuItem key={feature} value={feature}>
+                      {formatFeatureLabel(feature)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: 160 }} size="small">
+                <InputLabel id="select-y-feature-label">Y-Axis</InputLabel>
+                <Select
+                  labelId="select-y-feature-label"
+                  value={
+                    availableFeatures.includes(selectedYFeature)
+                      ? selectedYFeature
+                      : ''
+                  }
+                  label="Y-Axis"
+                  onChange={handleYFeatureChange}
+                  disabled={controlsDisabled || availableFeatures.length === 0}
+                >
+                  {availableFeatures.map((feature) => (
+                    <MenuItem key={feature} value={feature}>
+                      {formatFeatureLabel(feature)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+          )}
+        </Stack>
       </Stack>
 
       <Box
@@ -279,10 +393,14 @@ export const VisualizationArea: React.FC = () => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: 'rgba(255, 255, 255, 0.72)',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(17, 17, 17, 0.72)'
+                  : 'rgba(255, 255, 255, 0.72)',
               zIndex: 1,
             }}
             aria-live="polite"
+            role="status"
           >
             <CircularProgress size={36} />
             <Typography variant="body2" sx={{ mt: 1 }}>

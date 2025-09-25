@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useId } from 'react';
 import {
   Card,
   CardContent,
@@ -21,6 +21,8 @@ export interface InfoPanelProps {
  */
 export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
   const context = useContext(WineDataContext);
+  const sectionLabelId = useId();
+  const statusId = useId();
 
   // Dataset metadata based on the UCI Wine Quality dataset
   const datasetInfo = {
@@ -85,6 +87,10 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
   return (
     <Card
       className={className}
+      component="section"
+      role="complementary"
+      aria-labelledby={sectionLabelId}
+      aria-describedby={statusId}
       sx={{
         backgroundColor: 'grey.50',
         border: '1px solid',
@@ -92,7 +98,12 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
       }}
     >
       <CardContent>
-        <Typography variant="h6" component="h3" gutterBottom>
+        <Typography
+          variant="h6"
+          component="h3"
+          gutterBottom
+          id={sectionLabelId}
+        >
           Dataset Information
         </Typography>
         {loadStatus === 'loading' ? (
@@ -143,7 +154,13 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
                 <Typography variant="subtitle2" component="span">
                   Instances:{' '}
                 </Typography>
-                <Typography variant="body2" component="span">
+                <Typography
+                  variant="body2"
+                  component="span"
+                  id={statusId}
+                  role="status"
+                  aria-live="polite"
+                >
                   {filteredCount.toLocaleString()}
                   {filteredCount !== totalCount && (
                     <span> of {totalCount.toLocaleString()} shown</span>

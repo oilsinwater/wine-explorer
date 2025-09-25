@@ -87,7 +87,9 @@ describe('VisualizationArea', () => {
     wineData: mockWineData,
     filteredData: mockWineData,
     currentDataset: 'red' as WineDataSet,
+    loadStatus: 'ready' as const,
     loading: false,
+    isFiltering: false,
     error: null,
     switchDataset: vi.fn(),
     filters: {
@@ -102,6 +104,8 @@ describe('VisualizationArea', () => {
       pH: { min: 2.7, max: 4.0 },
       volatileAcidity: { min: 0.1, max: 1.2 },
     },
+    retryLoad: vi.fn(),
+    lastLoadedAt: null,
   };
 
   it('shows visualization skeleton with delayed appearance while loading', () => {
@@ -197,11 +201,12 @@ describe('VisualizationArea', () => {
       retryable: true,
     };
 
-    renderWithContext({
+    const errorContext = {
       ...baseContext,
       loadStatus: 'error',
       error: normalizedError,
-    });
+    } as any;
+    renderWithContext(errorContext);
 
     expect(screen.getByText(/Network issue/i)).toBeInTheDocument();
   });
@@ -209,11 +214,12 @@ describe('VisualizationArea', () => {
   it('displays skeleton while dataset loading', () => {
     vi.useFakeTimers();
 
-    renderWithContext({
+    const loadingContext = {
       ...baseContext,
       loadStatus: 'loading',
       loading: true,
-    });
+    } as any;
+    renderWithContext(loadingContext);
 
     act(() => {
       vi.advanceTimersByTime(150);
@@ -245,8 +251,9 @@ describe('VisualizationArea', () => {
       filteredData: [],
     });
 
-    expect(
-      screen.getByText(/No records match the current filters/i)
-    ).toBeInTheDocument();
+    const messages = screen.getAllByText(
+      /No records match the current filters/i
+    );
+    expect(messages.length).toBeGreaterThan(0);
   });
 });

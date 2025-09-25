@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import {
   WineDataProvider,
   WineDataContext,
@@ -84,6 +84,20 @@ describe('WineDataContext', () => {
           message: 'Network issue',
         })
       )
+      .mockRejectedValueOnce(
+        new DatasetLoadError({
+          code: 'NETWORK_ERROR',
+          dataset: 'red',
+          message: 'Network issue',
+        })
+      )
+      .mockRejectedValueOnce(
+        new DatasetLoadError({
+          code: 'NETWORK_ERROR',
+          dataset: 'red',
+          message: 'Network issue',
+        })
+      )
       .mockResolvedValueOnce([sampleRow as any]);
 
     vi.spyOn(wineDataManager, 'getFeatureRanges').mockReturnValue(ranges);
@@ -97,8 +111,9 @@ describe('WineDataContext', () => {
       </WineDataProvider>
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('status')).toHaveTextContent('error')
+    await waitFor(
+      () => expect(screen.getByTestId('status')).toHaveTextContent('error'),
+      { timeout: 2500 }
     );
     expect(screen.getByTestId('error-description')).toHaveTextContent(
       /Network issue/i
@@ -109,6 +124,6 @@ describe('WineDataContext', () => {
     await waitFor(() =>
       expect(screen.getByTestId('status')).toHaveTextContent('ready')
     );
-    expect(loadDataSpy).toHaveBeenCalledTimes(2);
+    expect(loadDataSpy).toHaveBeenCalledTimes(4);
   });
 });
