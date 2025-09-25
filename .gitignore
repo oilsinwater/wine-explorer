@@ -3,7 +3,6 @@
 #CLI agents
 .code/
 .claude/
-.bmad-core/
 .clinerules/
 .crush/
 .gemini/
@@ -11,6 +10,27 @@
 .serena/
 .vscode/
 .qwen/
+.bmad-core/
+.bmad-*/
+.cursor/
+.continue/
+.codewhisperer/
+.copilot/
+.tabnine/
+.aider/
+.windsurf/
+.bolt/
+.v0/
+.replit/
+.stackblitz/
+.codesandbox/
+.gitpod/
+.codespaces/
+.anthropic/
+.openai/
+.deepseek/
+.mistral/
+.perplexity/
 
 # dependencies
 node_modules/
