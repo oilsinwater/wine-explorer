@@ -10,8 +10,12 @@ import { ImageWrapper } from './ImageWrapper';
 export const Footer: React.FC = () => {
   return (
     <Box
+      component="footer"
+      role="contentinfo"
       sx={{
-        backgroundColor: 'white',
+        backgroundColor: (theme) => theme.palette.background.paper,
+        borderTop: '1px solid',
+        borderTopColor: (theme) => theme.palette.divider,
         padding: 4,
       }}
     >
@@ -25,21 +29,25 @@ export const Footer: React.FC = () => {
                 flexWrap: 'wrap',
               }}
             >
-              <AppLink to="/">Home</AppLink>
+              <AppLink to="/" aria-label="Navigate to home">
+                Home
+              </AppLink>
             </Stack>
           </Grid>
           <Grid item md={6}>
             <Stack alignItems="center">
-              <Typography>
+              <Typography component="p" variant="body2" align="center">
                 Describe your project, place a copyright statement, or credit
                 your funding organizations.
               </Typography>
               <AppLink to="/">
                 <ImageWrapper height={60}>
                   <img
+                    alt="Wine Explorer wordmark"
                     src={cleanPath(
                       `${import.meta.env.BASE_URL}/strudel-logo-header.png`
                     )}
+                    loading="lazy"
                   />
                 </ImageWrapper>
               </AppLink>

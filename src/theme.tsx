@@ -153,3 +153,72 @@ export const theme = createTheme({
     },
   },
 });
+
+export const highContrastTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#060606',
+      paper: '#111111',
+    },
+    primary: {
+      main: '#ffbf47',
+      dark: '#e09b00',
+      light: '#ffd36d',
+      contrastText: '#000000',
+    },
+    secondary: {
+      main: '#64ffda',
+      dark: '#1de9b6',
+      light: '#9cfffb',
+      contrastText: '#001b1a',
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#e5e7eb',
+    },
+    divider: '#374151',
+    neutral: {
+      main: '#DADADA',
+      light: '#e0e0e0',
+      dark: '#828282',
+    },
+    grey: {
+      50: '#1f2937',
+      500: '#6b7280',
+      900: '#f3f4f6',
+    },
+  },
+  shape: {
+    borderRadius: 4,
+  },
+  typography: {
+    htmlFontSize: 16,
+    fontFamily: `"Helvetica", "Verdana", "Arial", sans-serif`,
+    fontSize: 14,
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 700,
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          boxShadow: 'none',
+        },
+        outlined: {
+          borderColor: '#f9fafb',
+          color: '#f9fafb',
+        },
+      },
+    },
+  },
+});

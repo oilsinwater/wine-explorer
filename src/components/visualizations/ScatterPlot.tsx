@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { WineDataPoint } from '../../types/wine';
 import { useTheme } from '@mui/material/styles';
 import { Typography } from '@mui/material';
+import { generateScatterDescription } from '../../utils/statistics';
 
 interface ScatterPlotProps {
   data: WineDataPoint[];
@@ -34,7 +35,6 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .map((d) => d[yFeature])
       .filter((value): value is number => typeof value === 'number');
 
-    const points = Math.min(xValues.length, yValues.length);
     const formattedX = xFeature.toString();
     const formattedY = yFeature.toString();
 
@@ -84,7 +84,12 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       },
     };
 
-    const summaryText = `${points.toLocaleString()} points plotted between ${formattedX} and ${formattedY}.`;
+    const summaryText = generateScatterDescription(
+      formattedX,
+      formattedY,
+      xValues,
+      yValues
+    );
 
     return {
       plotData: scatterData,

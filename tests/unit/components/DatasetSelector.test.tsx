@@ -63,9 +63,13 @@ describe('DatasetSelector', () => {
   it('has accessible labels', () => {
     renderWithContext();
 
-    expect(screen.getByLabelText('dataset selector')).toBeInTheDocument();
+    expect(
+      screen.getByRole('region', { name: /dataset/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('red wine dataset')).toBeInTheDocument();
     expect(screen.getByLabelText('white wine dataset')).toBeInTheDocument();
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion.textContent).toMatch(/dataset/i);
   });
 
   it('switches dataset on toggle click', () => {
@@ -80,11 +84,12 @@ describe('DatasetSelector', () => {
   it('delays spinner visibility while loading', () => {
     vi.useFakeTimers();
 
-    renderWithContext({
+    const contextValue = {
       ...baseContext,
       loading: true,
       loadStatus: 'loading',
-    });
+    } as any;
+    renderWithContext(contextValue);
 
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
 
@@ -102,11 +107,12 @@ describe('DatasetSelector', () => {
       retryable: true,
     };
 
-    renderWithContext({
+    const contextValue2 = {
       ...baseContext,
       loadStatus: 'error',
       error: normalizedError,
-    });
+    } as any;
+    renderWithContext(contextValue2);
 
     expect(screen.getByText(/Unable to load dataset/i)).toBeInTheDocument();
     const retryButton = screen.getByRole('button', { name: /retry/i });

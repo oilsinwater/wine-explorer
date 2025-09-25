@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { WineDataPoint } from '../../types/wine';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography } from '@mui/material';
+import { generateHistogramDescription } from '../../utils/statistics';
 
 interface HistogramPlotProps {
   data: WineDataPoint[];
@@ -38,17 +39,16 @@ export const HistogramPlot: React.FC<HistogramPlotProps> = ({
       range === 0 ? 1 : Math.max(1, Math.ceil(Math.log2(values.length) + 1));
     const size = range === 0 ? 1 : range / bins;
 
-    const mean =
-      values.reduce((acc, current) => acc + current, 0) / values.length;
-
-    const summaryText = `${values.length.toLocaleString()} samples • Min ${min.toFixed(
-      2
-    )}, Max ${max.toFixed(2)}, Avg ${mean.toFixed(2)}`;
+    const formattedFeature = feature.toString();
+    const accessibleDescription = generateHistogramDescription(
+      formattedFeature,
+      values
+    );
 
     return {
       xData: values,
       binSize: size,
-      summary: summaryText,
+      summary: accessibleDescription,
     };
   }, [data, feature]);
 
@@ -91,11 +91,14 @@ export const HistogramPlot: React.FC<HistogramPlotProps> = ({
         `<b>${formattedFeature}</b><br>` +
         'Range start: %{x:.2f}<br>' +
         'Count: %{y}<extra></extra>',
-      xbins: binSize
-        ? {
-            size: Number.isFinite(binSize) ? binSize : undefined,
-          }
-        : undefined,
+      xbins:
+        binSize && Number.isFinite(binSize)
+          ? {
+              start: Math.min(...xData),
+              end: Math.max(...xData),
+              size: binSize,
+            }
+          : undefined,
     },
   ];
 

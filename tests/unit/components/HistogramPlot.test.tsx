@@ -60,7 +60,7 @@ describe('HistogramPlot', () => {
     );
     expect(chart).toBeInTheDocument();
 
-    const summary = screen.getByText(/samples/i);
+    const summary = screen.getByText(/This histogram shows/i);
     expect(summary).toBeInTheDocument();
   });
 
