@@ -1,79 +1,104 @@
-# STRUDEL Kit
+# Wine Explorer
 
-STRUDEL Kit is a React and TypeScript-based starter kit for building scientific UIs based on the STRUDEL Design System and Task Flows. Visit [strudel.science](https://strudel.science) for more information about the STRUDEL project.
+Wine Explorer is a Strudel Kit demo that showcases a client-side data exploration workflow for the UCI Wine Quality datasets. The application is built with React, TypeScript, and Vite and demonstrates how to deliver rapid dataset inspection, lightweight analytics, and accessibility-first interactions without relying on a backend service.
 
-This library provides a suite of templates to implement UIs for various different task flows common to the scientific domain. The app is intended to be used as a starting point for building out a modern single-page web app for scientific-type UIs.
+## Features
 
-[Browse the full docs](https://strudel.science/strudel-kit/docs/)
+- Switch between red and white wine datasets with cached loading and retryable error handling.
+- Filter by alcohol, pH, and volatile acidity using keyboard-accessible range sliders that keep URL state in sync.
+- Explore interactive histograms and scatter plots powered by Plotly to compare feature distributions and relationships.
+- Review dataset metadata, citation details, and filtered record counts in an info panel optimized for assistive technology.
+- Ship as a static, client-only bundle that runs entirely in the browser and can be deployed to any static host.
 
-## What's included?
-- [**React**](https://react.dev/): A component-based JavaScript library for building UIs.
-- [**TypeScript**](https://www.typescriptlang.org/): A typed superset of JavaScript that compiles to plain JavaScript.
-- [**Vite**](https://vite.dev/): A fast, opinionated frontend build tool.
-- [**Material UI**](https://mui.com/material-ui/getting-started/): Open-source React component library based on Google's Material Design.
-- [**TanStack Router**](https://tanstack.com/router/latest): A fully type-safe router with built-in data fetching, first-class search-param APIs, and more.
-- [**ESLint**](https://eslint.org/): The pluggable linting utility for JavaScript and JSX.
-- [**Prettier**](https://prettier.io/): An opinionated code formatter.
-- [**Husky**](https://typicode.github.io/husky/): Runs a pre-commit hook to lint and style staged code.
-- [**Cypress**](https://www.cypress.io/): End-to-end tests for built-in templates.
-- [**Task Flow Templates**](https://strudel.science/design-system/task-flows/overview/): Six template flows based on common patterns. 
+## Prerequisites
 
-![Home page](images/home.png)
+- Node.js ^18.18.0 or >=20.0.0 (matches the `engines` field)
+- npm 9+
 
-![Run Computation results page](images/run-computation-results.png)
+## Installation
 
-## Getting Started
-
-### Option 1: Use this template
-
-Click the green "Use this template" button on the [strudel-kit GitHub page](https://github.com/strudel-science/strudel-kit). Create your own repository from the strudel-kit code and give it a name.
-
-Clone the strudel-kit repository from your new repo.
-
-### Option 2: degit
-
-Generate a new project from strudel-kit using [degit](https://github.com/Rich-Harris/degit):
-```
-npx degit strudel-science/strudel-kit my-app
-```
-
-### Option 3: Fork this repo
-
-Especially if you want to contribute back, you can click the Fork button to create a fork of this repo from the [strudel-kit GitHub page](https://github.com/strudel-science/strudel-kit).
-
-Clone the strudel-kit repository from your new fork.
-
-### Install and Start
-
-Install the dependencies:
-
-```
+```bash
+git clone https://github.com/superbloom/wine-explorer.git
+cd wine-explorer
 npm install
 ```
 
-Start up the app:
+## Local Development
+
+```bash
+npm run dev
+```
+
+The Vite dev server runs on http://localhost:5175 with strict port enforcement. Environment variables are optional; define `VITE_BASE_URL` in a `.env` file if the app is hosted behind a path prefix.
+
+## Quality Checks & Testing
+
+- `npm test` — runs the Vitest suite with the `jsdom` environment and shared setup in `tests/setup.ts`.
+- `npm run cy:open` — opens the Cypress runner for exploratory end-to-end testing.
+- `npm run cy:test` — runs the Cypress suite headlessly for CI.
+- `npm run lint` / `npm run lint:fix` — lints the project with the Airbnb TypeScript configuration.
+- `npm run prettier` / `npm run prettier:fix` — checks or formats code according to the project Prettier rules.
+- `npm run style:all` — type-checks, lints, and runs Prettier to mimic the repository gate before committing.
+
+Vitest supports watch mode via `npm test -- --watch` when iterating on new units.
+
+## Production Build
+
+```bash
+npm run build
+```
+
+The build step runs TypeScript type-checking and emits an optimized static bundle into `dist/`. Preview the production build locally before deploying:
+
+```bash
+npm run preview
+```
+
+## Deployment
+
+- Ensure `homepage` in `package.json` or `VITE_BASE_URL` matches the target path when deploying behind a subdirectory.
+- `npm run build` to generate the latest bundle.
+- Publish the `dist/` directory to your static host.
+
+For GitHub Pages the project ships with a helper script:
+
+```bash
+npm run deploy
+```
+
+This command pushes the built `dist/` folder to the `gh-pages` branch using the `gh-pages` CLI with history preservation (`-e demo`).
+
+## Project Structure
 
 ```
-npm start
+.
+├── public/                 # Static assets, including winequality CSV datasets
+├── src/
+│   ├── components/         # Dataset selector, filter panel, visualization suite, info panel, layout primitives
+│   ├── context/            # React contexts for wine data and accessibility announcements
+│   ├── hooks/              # Reusable hooks (e.g., delayed spinners)
+│   ├── pages/              # Routed page shells used by TanStack Router
+│   ├── types/              # Shared TypeScript interfaces for wine data and filters
+│   └── utils/              # Data manager, error helpers, and filtering utilities
+├── tests/                  # Vitest setup and helpers
+├── cypress/                # Cypress end-to-end specs and fixtures
+├── docs/                   # Extended architecture, component, and workflow documentation
+└── vite.config.ts          # Vite and Vitest configuration
 ```
 
-Open [http://localhost:5175](http://localhost:5175) to view the app in the browser.
+## Documentation
 
-Begin modifying the templates in `src/pages`.
+Developer documentation lives in `docs/`. Start with `docs/README.md` for an index that links to architecture, component, workflow, and API references.
 
-## Contributions
+## Contributing
 
-STRUDEL Kit welcomes contributions of all kinds! Learn how to submit suggestions and changes in [CONTRIBUTING.md](https://github.com/strudel-science/strudel-kit/blob/main/CONTRIBUTING.md).
+Contributions are welcome! Begin with `CONTRIBUTING.md` for branching workflow, code standards, and review expectations, and review `CODE_OF_CONDUCT.md` for community guidelines. Open an issue before large changes so maintainers can help scope the work.
 
-## License 
+## License
 
-This software is licensed through the [Lawrence Berkeley National Lab](https://www.lbl.gov/) and can be used, modified, and shared at absolutely no cost. [Read the full license](https://github.com/strudel-science/strudel-kit/blob/main/LICENSE).
+Wine Explorer inherits the STRUDEL project license. Review the full terms in `LICENSE`, published by Lawrence Berkeley National Laboratory on behalf of the STRUDEL project.
 
-## Attribution
+## Acknowledgments
 
-We kindly ask that you take two steps to attribute this repo if you find it useful to your work:
-
-1. Give us a star on our GitHub Page
-2. Credit the STRUDEL project and strudel-kit repo in your README.
-
-> This project utilized the [strudel-kit](https://github.com/strudel-science/strudel-kit/tree/main) repository. Read more about [STRUDEL](https://strudel.science).
+- UCI Machine Learning Repository for the red and white wine quality datasets (DOI: 10.24432/C56S3T).
+- The STRUDEL project and Superbloom for the design system, task flow templates, and engineering starter kit used to deliver this demo.
