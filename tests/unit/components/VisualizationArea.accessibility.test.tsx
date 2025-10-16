@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { VisualizationArea } from '../../../src/components/visualizations/VisualizationArea';
 import { WineDataContext } from '../../../src/context/WineDataContext';
-import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
+import { WineDataSet } from '../../../src/types/wine';
+import { WineDataPoint } from '../../../src/types/wine.types';
 
 const mockSwitchDataset = vi.fn();
 const mockUpdateFilters = vi.fn();
@@ -11,13 +12,13 @@ const mockRetryLoad = vi.fn();
 
 const sampleWineData: WineDataPoint[] = [
   {
-    'fixed acidity': 7.4,
-    'volatile acidity': 0.7,
-    'citric acid': 0,
-    'residual sugar': 1.9,
+    fixedAcidity: 7.4,
+    volatileAcidity: 0.7,
+    citricAcid: 0,
+    residualSugar: 1.9,
     chlorides: 0.076,
-    'free sulfur dioxide': 11,
-    'total sulfur dioxide': 34,
+    freeSulfurDioxide: 11,
+    totalSulfurDioxide: 34,
     density: 0.9978,
     pH: 3.51,
     sulphates: 0.56,
@@ -25,13 +26,13 @@ const sampleWineData: WineDataPoint[] = [
     quality: 5,
   },
   {
-    'fixed acidity': 7.8,
-    'volatile acidity': 0.88,
-    'citric acid': 0,
-    'residual sugar': 2.6,
+    fixedAcidity: 7.8,
+    volatileAcidity: 0.88,
+    citricAcid: 0,
+    residualSugar: 2.6,
     chlorides: 0.098,
-    'free sulfur dioxide': 25,
-    'total sulfur dioxide': 67,
+    freeSulfurDioxide: 25,
+    totalSulfurDioxide: 67,
     density: 0.9968,
     pH: 3.2,
     sulphates: 0.68,
@@ -63,6 +64,8 @@ const baseContext = {
   },
   retryLoad: mockRetryLoad,
   lastLoadedAt: null as number | null,
+  datasetMetadata: {},
+  loadMetrics: {},
 };
 
 const renderWithContext = (contextValue = baseContext) => {

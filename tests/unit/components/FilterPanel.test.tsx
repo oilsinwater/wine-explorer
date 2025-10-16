@@ -2,11 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { FilterPanel } from '../../../src/components/FilterPanel';
 import { WineDataContext } from '../../../src/context/WineDataContext';
-import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
+import { WineDataSet } from '../../../src/types/wine';
+import { WineDataPoint } from '../../../src/types/wine.types';
 
 // Mock the debounce function
-vi.mock('@mui/material', async () => {
-  const actual = await vi.importActual('@mui/material');
+vi.mock('@mui/material/utils', async () => {
+  const actual = await vi.importActual('@mui/material/utils');
   return {
     ...Object.assign({}, actual),
     debounce: (fn: Function) => fn,
@@ -40,6 +41,8 @@ const mockContext = {
   clearFilters: vi.fn(),
   retryLoad: vi.fn(),
   lastLoadedAt: null as number | null,
+  datasetMetadata: {},
+  loadMetrics: {},
 };
 
 const renderWithContext = () => {

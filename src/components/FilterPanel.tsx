@@ -13,13 +13,13 @@ import {
   CardContent,
   Typography,
   Stack,
-  debounce,
   CircularProgress,
   Skeleton,
 } from '@mui/material';
+import { debounce } from '@mui/material/utils';
 import { WineDataContext } from '../context/WineDataContext';
 import { RangeSlider } from './RangeSlider';
-import { FilterCriteria } from '../utils/WineDataManager';
+import { FilterCriteria } from '../data/WineDataManager';
 import { useAccessibility } from '../context/AccessibilityContext';
 
 export interface FilterPanelProps {

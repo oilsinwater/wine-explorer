@@ -1,4 +1,4 @@
-import React, { useContext, useId } from 'react';
+import React, { useContext, useId, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -24,48 +24,6 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
   const sectionLabelId = useId();
   const statusId = useId();
 
-  // Dataset metadata based on the UCI Wine Quality dataset
-  const datasetInfo = {
-    red: {
-      source: 'UCI Machine Learning Repository',
-      doi: '10.24432/C56S3T',
-      totalInstances: 1599,
-      features: [
-        'fixed acidity',
-        'volatile acidity',
-        'citric acid',
-        'residual sugar',
-        'chlorides',
-        'free sulfur dioxide',
-        'total sulfur dioxide',
-        'density',
-        'pH',
-        'sulphates',
-        'alcohol',
-        'quality',
-      ],
-    },
-    white: {
-      source: 'UCI Machine Learning Repository',
-      doi: '10.24432/C56S3T',
-      totalInstances: 4898,
-      features: [
-        'fixed acidity',
-        'volatile acidity',
-        'citric acid',
-        'residual sugar',
-        'chlorides',
-        'free sulfur dioxide',
-        'total sulfur dioxide',
-        'density',
-        'pH',
-        'sulphates',
-        'alcohol',
-        'quality',
-      ],
-    },
-  };
-
   if (!context) {
     return <CircularProgress />;
   }
@@ -79,10 +37,34 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
     isFiltering,
     retryLoad,
     lastLoadedAt,
+    datasetMetadata,
+    loadMetrics,
   } = context;
-  const currentDatasetInfo = datasetInfo[currentDataset];
+  const currentDatasetInfo = useMemo(() => {
+    const fallback = {
+      source: 'UCI Machine Learning Repository',
+      doi: '10.24432/C56S3T',
+      totalInstances: wineData.length,
+      features: [
+        'fixed acidity',
+        'volatile acidity',
+        'citric acid',
+        'residual sugar',
+        'chlorides',
+        'free sulfur dioxide',
+        'total sulfur dioxide',
+        'density',
+        'pH',
+        'sulphates',
+        'alcohol',
+        'quality',
+      ],
+    };
+    return datasetMetadata[currentDataset] ?? fallback;
+  }, [currentDataset, datasetMetadata, wineData.length]);
   const filteredCount = filteredData.length;
   const totalCount = wineData.length;
+  const metrics = loadMetrics[currentDataset];
 
   return (
     <Card
@@ -179,6 +161,19 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ className }) => {
             {lastLoadedAt && (
               <Typography variant="caption" color="text.secondary">
                 Updated {new Date(lastLoadedAt).toLocaleTimeString()}
+              </Typography>
+            )}
+            {metrics && (
+              <Typography variant="caption" color="text.secondary">
+                Load time: {metrics.durationMs.toFixed(0)}ms · Size:{' '}
+                {(metrics.sizeBytes / 1024).toFixed(1)} KB
+                {metrics.anomalyCount > 0 && (
+                  <span>
+                    {' '}
+                    · Normalised {metrics.anomalyCount} value
+                    {metrics.anomalyCount === 1 ? '' : 's'}
+                  </span>
+                )}
               </Typography>
             )}
           </Stack>
