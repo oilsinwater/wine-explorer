@@ -1,6 +1,6 @@
 import React, { useMemo, useId } from 'react';
 import Plot from 'react-plotly.js';
-import { WineDataPoint } from '../../types/wine';
+import { WineDataPoint } from '../../types/wine.types';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography } from '@mui/material';
 import { generateHistogramDescription } from '../../utils/statistics';

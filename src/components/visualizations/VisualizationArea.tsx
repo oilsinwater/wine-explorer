@@ -25,7 +25,7 @@ import {
 import { WineDataContext } from '../../context/WineDataContext';
 import { HistogramPlot } from './HistogramPlot';
 import { ScatterPlot } from './ScatterPlot';
-import { WineDataPoint } from '../../types/wine';
+import { WineDataPoint } from '../../types/wine.types';
 import { useDelayedVisibility } from '../../hooks/useDelayedVisibility';
 import { useAccessibility } from '../../context/AccessibilityContext';
 
