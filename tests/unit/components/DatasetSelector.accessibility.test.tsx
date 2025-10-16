@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { DatasetSelector } from '../../../src/components/DatasetSelector';
 import { WineDataContext } from '../../../src/context/WineDataContext';
-import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
+import { WineDataSet } from '../../../src/types/wine';
+import { WineDataPoint } from '../../../src/types/wine.types';
 
 const mockSwitchDataset = vi.fn();
 const mockRetryLoad = vi.fn();
@@ -30,6 +31,8 @@ const baseContext = {
   },
   retryLoad: mockRetryLoad,
   lastLoadedAt: null as number | null,
+  datasetMetadata: {},
+  loadMetrics: {},
 };
 
 const renderWithContext = (contextValue = baseContext) => {

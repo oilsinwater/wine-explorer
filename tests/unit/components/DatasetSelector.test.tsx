@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DatasetSelector } from '../../../src/components/DatasetSelector';
 import { WineDataContext } from '../../../src/context/WineDataContext';
-import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
+import { WineDataSet } from '../../../src/types/wine';
+import { WineDataPoint } from '../../../src/types/wine.types';
 
 const mockSwitchDataset = vi.fn();
 const mockRetryLoad = vi.fn();
@@ -31,6 +32,8 @@ const baseContext = {
   },
   retryLoad: mockRetryLoad,
   lastLoadedAt: null as number | null,
+  datasetMetadata: {},
+  loadMetrics: {},
 };
 
 const renderWithContext = (contextValue = baseContext) => {
@@ -131,7 +134,9 @@ describe('DatasetSelector', () => {
       name: /white wine dataset/i,
     });
 
-    redButton.focus();
+    act(() => {
+      redButton.focus();
+    });
     expect(redButton).toHaveFocus();
 
     await user.keyboard('[ArrowRight]');
