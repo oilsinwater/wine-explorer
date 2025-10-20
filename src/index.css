@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+
 :root {
-  --focus-ring-color: #005fcc;
+  --focus-ring-color: #1c336b;
   --skip-link-bg: #ffffff;
   --skip-link-color: #111111;
 }
@@ -12,12 +14,22 @@ body {
   height: 100%;
   margin: 0;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f6;
-  color: #1f2937;
+  background-color: #f8f8f5;
+  color: #1f1f1f;
 }
 
 body[data-high-contrast='true'] {
