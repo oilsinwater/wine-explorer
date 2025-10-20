@@ -54,6 +54,13 @@ export async function loadDatasetCsv(
   const durationMs = end - start;
 
   if (durationMs > 2000) {
+    // Warn when dataset loading exceeds the UX performance target from the PRD.
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[dataset-load] ${dataset} dataset took ${durationMs.toFixed(
+        0
+      )}ms which exceeds the 2000ms target`
+    );
   }
 
   const sizeBytes = new TextEncoder().encode(csvText).length;
