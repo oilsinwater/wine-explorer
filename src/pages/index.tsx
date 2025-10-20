@@ -1,19 +1,13 @@
 import {
   Box,
   Button,
-  Chip,
   Container,
+  Divider,
   Grid,
-  Paper,
   Stack,
   Typography,
 } from '@mui/material';
-import InsightsIcon from '@mui/icons-material/Insights';
-import TuneIcon from '@mui/icons-material/Tune';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import { createFileRoute } from '@tanstack/react-router';
-import { alpha } from '@mui/material/styles';
 import { AppLink } from '../components/AppLink';
 import { ImageWrapper } from '../components/ImageWrapper';
 import { cleanPath } from '../utils/queryParams.utils';
@@ -26,30 +20,30 @@ export const Route = createFileRoute('/')({
  * Home page component that renders at the root route /
  */
 function Index() {
-  const featureCards = [
+  const featureSections = [
     {
-      icon: <InsightsIcon color="primary" fontSize="large" />,
-      title: 'Documented datasets',
+      eyebrow: 'Dataset curation',
+      title: 'Documented provenance with reproducible notes',
       description:
-        'Red and white wine chemistry records from the UCI repository include citation details, field mappings, and reproducible loading notes.',
+        'Both UCI wine quality datasets include bibliographic references, schema mappings, and step-by-step loading instructions so seminars can cite work with confidence.',
     },
     {
-      icon: <TuneIcon color="primary" fontSize="large" />,
-      title: 'Adjustable parameters',
+      eyebrow: 'Filtering practice',
+      title: 'Cohort shaping through accessible controls',
       description:
-        'Keyboard-accessible controls expose physicochemical ranges so researchers can isolate cohorts without leaving the browser.',
+        'Range inputs are keyboard navigable and screen-reader annotated, inviting discussion about inclusive filter design while highlighting physicochemical trade-offs.',
     },
     {
-      icon: <BarChartIcon color="primary" fontSize="large" />,
-      title: 'Comparable visualizations',
+      eyebrow: 'Visual reading',
+      title: 'Histograms and scatter plots for comparison',
       description:
-        'Histogram and scatter plot views facilitate side-by-side inspection of distributions and correlations across variables.',
+        'Parallel views allow facilitators to contrast distributions and correlations in real time, reinforcing interpretive skills with quantitative footing.',
     },
     {
-      icon: <AccessibilityNewIcon color="primary" fontSize="large" />,
-      title: 'Inclusive presentation',
+      eyebrow: 'Accessibility',
+      title: 'High-contrast toggles with narrated feedback',
       description:
-        'High-contrast theming, skip links, and semantic annotations support classroom demonstrations and assistive technologies.',
+        'Help, narration, and high-contrast controls sit within the visualization frame so accessibility conversations can unfold alongside the data story.',
     },
   ];
 
@@ -78,52 +72,39 @@ function Index() {
     <Box>
       <Box
         sx={{
-          backgroundColor: (theme) => theme.palette.background.paper,
+          backgroundColor: 'transparent',
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          py: { xs: 6, md: 8 },
+          py: { xs: 8, md: 12 },
         }}
       >
         <Container maxWidth="lg">
-          <Grid
-            container
-            spacing={{ xs: 6, md: 8 }}
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Grid item xs={12} md={8}>
-              <Stack spacing={3}>
-                <Chip
-                  label="Project overview"
-                  color="secondary"
-                  sx={{
-                    alignSelf: 'flex-start',
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    textTransform: 'uppercase',
-                  }}
-                />
-                <Typography
-                  component="h1"
-                  variant="h2"
-                  fontWeight={700}
-                  lineHeight={1.1}
-                >
-                  Wine Explorer: Physicochemical reference interface
+          <Grid container spacing={{ xs: 4, md: 8 }} alignItems="flex-start">
+            <Grid item xs={12} md={7}>
+              <Stack spacing={3} sx={{ maxWidth: 640 }}>
+                <Typography variant="overline" color="text.secondary">
+                  Wine Explorer
+                </Typography>
+                <Typography component="h1" variant="h1" sx={{ maxWidth: 620 }}>
+                  A reference surface for discussing wine chemistry in academic
+                  settings
                 </Typography>
                 <Typography
                   variant="body1"
                   sx={{
                     color: 'text.secondary',
-                    maxWidth: 540,
                   }}
                 >
                   This single-page application accompanies the Wine Explorer
-                  PRD, providing a reserved, academically oriented surface for
-                  studying the UCI wine quality datasets. Use it to demonstrate
-                  filtering strategies, visual analysis workflows, and
-                  accessibility considerations in an instructional setting.
+                  PRD. It offers a reserved environment for unpacking the UCI
+                  red and white wine quality datasets, encouraging structured
+                  critique of filtering choices, visualization literacy, and
+                  accessibility practices.
                 </Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={2}
+                  alignItems={{ xs: 'stretch', sm: 'center' }}
+                >
                   <Button
                     component={AppLink}
                     to="/wine-explorer"
@@ -138,51 +119,58 @@ function Index() {
                     href="https://strudel.science/docs"
                     target="_blank"
                     rel="noreferrer"
-                    variant="outlined"
+                    variant="text"
                     size="large"
-                    sx={{
-                      borderColor: (theme) =>
-                        alpha(theme.palette.text.primary, 0.35),
-                      color: 'text.primary',
-                      '&:hover': {
-                        borderColor: 'text.primary',
-                        color: 'text.primary',
-                      },
-                    }}
                   >
                     View methodology notes
                   </Button>
                 </Stack>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    p: 2.5,
-                    maxWidth: 520,
-                  }}
-                >
+              </Stack>
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <Box
+                sx={{
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                  borderRadius: 3,
+                  p: { xs: 3, md: 4 },
+                  backgroundColor: (theme) => theme.palette.background.paper,
+                }}
+              >
+                <Stack spacing={2}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Reference dossier
+                  </Typography>
                   <Stack spacing={1.5}>
-                    <Typography variant="subtitle2" fontWeight={600}>
-                      Core materials
-                    </Typography>
                     <Stack spacing={0.5}>
-                      <Typography variant="body2" color="text.secondary">
-                        Dataset citation: Cortez et al., 2009 (DOI:
+                      <Typography variant="caption" color="text.secondary">
+                        Dataset citation
+                      </Typography>
+                      <Typography variant="body2">
+                        Cortez et&nbsp;al., 2009 — UCI Wine Quality (DOI:
                         10.24432/C56S3T)
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Variables: 11 physicochemical measurements with quality
-                        scores
+                    </Stack>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        Variables
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Purpose: Illustrate data storytelling patterns for wine
-                        programs within the Strudel Kit architecture.
+                      <Typography variant="body2">
+                        11 physicochemical measurements with quality scores,
+                        covering red and white wine styles
+                      </Typography>
+                    </Stack>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        Classroom use
+                      </Typography>
+                      <Typography variant="body2">
+                        Support critiques of data storytelling, reproducibility,
+                        and accessible interface construction.
                       </Typography>
                     </Stack>
                   </Stack>
-                </Paper>
-              </Stack>
+                </Stack>
+              </Box>
             </Grid>
           </Grid>
         </Container>
@@ -196,102 +184,108 @@ function Index() {
         <Stack spacing={6}>
           <Stack spacing={1}>
             <Typography variant="overline" color="text.secondary">
-              About the interface
+              Interface emphasis
             </Typography>
-            <Typography variant="h4" component="h2" fontWeight={600}>
-              Designed for instruction, replication, and critique
+            <Typography variant="h3" component="h2">
+              Built for instruction, replication, and critique
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ maxWidth: 720 }}
+            >
+              Each section foregrounds process over polish so faculty and
+              students can interrogate design decisions while remaining close to
+              the underlying datasets.
             </Typography>
           </Stack>
-          <Grid container spacing={4}>
-            {featureCards.map((feature) => (
-              <Grid key={feature.title} item xs={12} md={6}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                    borderRadius: 3,
-                    height: '100%',
-                    p: 3,
-                  }}
-                >
-                  <Stack spacing={2}>
-                    {feature.icon}
-                    <Stack spacing={1}>
-                      <Typography variant="h6" component="h3" fontWeight={600}>
-                        {feature.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {feature.description}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-          <Paper
-            elevation={0}
+          <Box
             sx={{
-              borderRadius: 3,
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              p: { xs: 3, md: 4 },
-              backgroundColor: 'background.paper',
+              display: 'grid',
+              gap: { xs: 3, md: 4 },
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
             }}
           >
-            <Stack spacing={3}>
+            {featureSections.map((feature) => (
+              <Box
+                key={feature.title}
+                sx={{
+                  borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                  pt: { xs: 2.5, md: 3 },
+                }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  {feature.eyebrow}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                  {feature.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 1.5 }}
+                >
+                  {feature.description}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+          <Box
+            sx={{
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+              borderRadius: 3,
+              p: { xs: 3, md: 4 },
+              backgroundColor: (theme) => theme.palette.background.paper,
+            }}
+          >
+            <Stack spacing={2.5}>
               <Stack spacing={1}>
                 <Typography variant="overline" color="text.secondary">
                   Suggested walkthrough
                 </Typography>
-                <Typography variant="h5" component="h3" fontWeight={600}>
-                  A structured tour for seminars and review sessions
+                <Typography variant="h5" component="h3">
+                  A seminar-friendly progression
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  These steps help facilitators keep the session grounded in the
-                  underlying datasets while demonstrating the exploratory
-                  controls.
+                  Use the following flow to keep workshop participants oriented
+                  while demonstrating the interface.
                 </Typography>
               </Stack>
-              <Grid container spacing={3}>
+              <Stack
+                spacing={2.5}
+                divider={<Divider flexItem sx={{ borderColor: 'divider' }} />}
+              >
                 {workflowSteps.map((step) => (
-                  <Grid item xs={12} md={4} key={step.title}>
-                    <Stack spacing={1.5}>
-                      <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 700,
-                          backgroundColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.15),
-                          color: 'primary.main',
-                          fontSize: '1.1rem',
-                        }}
-                        aria-hidden
-                      >
-                        {step.step}
-                      </Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {step.title}
-                      </Typography>
+                  <Stack
+                    key={step.title}
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={{ xs: 1.5, sm: 3 }}
+                    alignItems={{ xs: 'flex-start', sm: 'center' }}
+                  >
+                    <Typography
+                      variant="overline"
+                      color="text.secondary"
+                      sx={{ minWidth: 72 }}
+                    >
+                      Step&nbsp;{step.step}
+                    </Typography>
+                    <Stack spacing={0.75}>
+                      <Typography variant="subtitle1">{step.title}</Typography>
                       <Typography variant="body2" color="text.secondary">
                         {step.description}
                       </Typography>
                     </Stack>
-                  </Grid>
+                  </Stack>
                 ))}
-              </Grid>
+              </Stack>
             </Stack>
-          </Paper>
-          <Paper
-            elevation={0}
+          </Box>
+          <Box
             sx={{
-              backgroundColor: 'grey.100',
               borderRadius: 3,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
               p: { xs: 3, md: 4 },
+              backgroundColor: (theme) => theme.palette.grey[50],
             }}
           >
             <Stack
@@ -299,7 +293,7 @@ function Index() {
               spacing={{ xs: 3, md: 6 }}
               alignItems="center"
             >
-              <ImageWrapper height={120}>
+              <ImageWrapper height={96}>
                 <img
                   src={cleanPath(
                     `${import.meta.env.BASE_URL}strudel-logo-icon.png`
@@ -309,18 +303,16 @@ function Index() {
                 />
               </ImageWrapper>
               <Stack spacing={1}>
-                <Typography variant="h5" fontWeight={600}>
-                  Powered by Strudel Kit
-                </Typography>
+                <Typography variant="h5">Powered by Strudel Kit</Typography>
                 <Typography variant="body1" color="text.secondary">
                   Wine Explorer adopts the Strudel Kit blueprint, pairing React,
-                  Material UI, and Plotly to illustrate how scientific datasets
-                  can be delivered in an accessible, maintainable presentation
-                  layer for academic audiences.
+                  Material UI, and Plotly to demonstrate how to surface
+                  scientifically grounded datasets with clear, accessible visual
+                  framing.
                 </Typography>
               </Stack>
             </Stack>
-          </Paper>
+          </Box>
         </Stack>
       </Container>
     </Box>
