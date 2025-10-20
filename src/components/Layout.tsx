@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import React, { PropsWithChildren, useCallback, useRef } from 'react';
 import { Footer } from './Footer';
-import { TopBar } from './TopBar';
 
 /**
  * Basic layout with navbar and footer
@@ -54,7 +53,6 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
           minHeight: '100%',
         }}
       >
-        <TopBar />
         <Box
           component="main"
           id="main-content"
