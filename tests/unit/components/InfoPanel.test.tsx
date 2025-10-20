@@ -2,18 +2,20 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { InfoPanel } from '../../../src/components/InfoPanel';
 import { WineDataContext } from '../../../src/context/WineDataContext';
-import { WineDataPoint, WineDataSet } from '../../../src/types/wine';
+import { WineDataSet } from '../../../src/types/wine';
+import { WineDataPoint, DatasetInfo } from '../../../src/types/wine.types';
+import { DatasetLoadMetrics } from '../../../src/data/WineDataManager';
 
 describe('InfoPanel', () => {
   const mockWineData: WineDataPoint[] = [
     {
-      'fixed acidity': 7.4,
-      'volatile acidity': 0.7,
-      'citric acid': 0,
-      'residual sugar': 1.9,
+      fixedAcidity: 7.4,
+      volatileAcidity: 0.7,
+      citricAcid: 0,
+      residualSugar: 1.9,
       chlorides: 0.076,
-      'free sulfur dioxide': 11,
-      'total sulfur dioxide': 34,
+      freeSulfurDioxide: 11,
+      totalSulfurDioxide: 34,
       density: 0.9978,
       pH: 3.51,
       sulphates: 0.56,
@@ -21,13 +23,13 @@ describe('InfoPanel', () => {
       quality: 5,
     },
     {
-      'fixed acidity': 7.8,
-      'volatile acidity': 0.88,
-      'citric acid': 0,
-      'residual sugar': 2.6,
+      fixedAcidity: 7.8,
+      volatileAcidity: 0.88,
+      citricAcid: 0,
+      residualSugar: 2.6,
       chlorides: 0.098,
-      'free sulfur dioxide': 25,
-      'total sulfur dioxide': 67,
+      freeSulfurDioxide: 25,
+      totalSulfurDioxide: 67,
       density: 0.9968,
       pH: 3.2,
       sulphates: 0.68,
@@ -59,6 +61,37 @@ describe('InfoPanel', () => {
     },
     retryLoad: () => {},
     lastLoadedAt: null,
+    datasetMetadata: {
+      red: {
+        type: 'red',
+        source: 'UCI Machine Learning Repository',
+        doi: '10.24432/C56S3T',
+        totalInstances: mockWineData.length,
+        features: [
+          'fixed acidity',
+          'volatile acidity',
+          'citric acid',
+          'residual sugar',
+          'chlorides',
+          'free sulfur dioxide',
+          'total sulfur dioxide',
+          'density',
+          'pH',
+          'sulphates',
+          'alcohol',
+          'quality',
+        ],
+      },
+    } as Partial<Record<WineDataSet, DatasetInfo>>,
+    loadMetrics: {
+      red: {
+        csvText: 'mock-data',
+        durationMs: 42,
+        sizeBytes: 2048,
+        parsedAt: Date.now(),
+        anomalyCount: 0,
+      },
+    } as Partial<Record<WineDataSet, DatasetLoadMetrics>>,
   };
 
   it('renders dataset information', () => {
@@ -81,8 +114,8 @@ describe('InfoPanel', () => {
       </WineDataContext.Provider>
     );
 
-    // Should show the count of filtered data
-    expect(screen.getByText('2')).toBeInTheDocument();
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('2');
   });
 
   it('displays filtered instance count when filtered', () => {
@@ -97,13 +130,10 @@ describe('InfoPanel', () => {
       </WineDataContext.Provider>
     );
 
-    // Should show "1 of 2 shown"
-    expect(screen.getByText('1')).toBeInTheDocument();
-    // The "2" might be in a separate element, so we'll check for the full text differently
-    const instancesElement = screen.getByText('Instances:');
-    expect(instancesElement.nextElementSibling).toHaveTextContent('1');
-    expect(instancesElement.nextElementSibling).toHaveTextContent('of');
-    expect(instancesElement.nextElementSibling).toHaveTextContent('2');
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('1');
+    expect(status).toHaveTextContent('of');
+    expect(status).toHaveTextContent('2');
   });
 
   it('displays loading state when dataset is loading', () => {

@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
 window.URL.revokeObjectURL = vi.fn();
 
-HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+const mockCanvasContext = {
   fillRect: vi.fn(),
   clearRect: vi.fn(),
   getImageData: vi.fn(() => ({ data: new Uint8ClampedArray() })),
@@ -26,4 +26,8 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
   arc: vi.fn(),
   fill: vi.fn(),
   measureText: vi.fn(() => ({ width: 0 })),
-}));
+} as unknown as CanvasRenderingContext2D;
+
+HTMLCanvasElement.prototype.getContext = vi
+  .fn(() => mockCanvasContext)
+  .mockName('getContext') as unknown as HTMLCanvasElement['getContext'];

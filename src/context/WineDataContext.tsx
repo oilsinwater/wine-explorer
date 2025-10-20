@@ -6,8 +6,13 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { WineDataPoint, WineDataSet } from '../types/wine';
-import { wineDataManager, FilterCriteria } from '../utils/WineDataManager';
+import { WineDataSet } from '../types/wine';
+import {
+  wineDataManager,
+  FilterCriteria,
+  DatasetLoadMetrics,
+} from '../data/WineDataManager';
+import { DatasetInfo, WineDataPoint } from '../types/wine.types';
 import {
   DatasetLoadError,
   NormalizedAppError,
@@ -30,6 +35,8 @@ interface WineDataContextType {
   featureRanges: FilterCriteria;
   retryLoad: () => void;
   lastLoadedAt: number | null;
+  datasetMetadata: Partial<Record<WineDataSet, DatasetInfo>>;
+  loadMetrics: Partial<Record<WineDataSet, DatasetLoadMetrics>>;
 }
 
 export const WineDataContext = createContext<WineDataContextType | undefined>(
@@ -68,6 +75,12 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
     cloneFilters(DEFAULT_FILTERS)
   );
   const [lastLoadedAt, setLastLoadedAt] = useState<number | null>(null);
+  const [datasetMetadata, setDatasetMetadata] = useState<
+    Partial<Record<WineDataSet, DatasetInfo>>
+  >({});
+  const [loadMetrics, setLoadMetrics] = useState<
+    Partial<Record<WineDataSet, DatasetLoadMetrics>>
+  >({});
 
   const filterQueryKeys = useMemo(
     () => ({
@@ -220,6 +233,14 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
         setFilteredData(wineDataManager.applyFilters(data, restoredFilters));
         setLoadStatus('ready');
         setLastLoadedAt(Date.now());
+        const info = wineDataManager.getDatasetInfo(dataset);
+        if (info) {
+          setDatasetMetadata((prev) => ({ ...prev, [dataset]: info }));
+        }
+        const metrics = wineDataManager.getLoadMetrics(dataset);
+        if (metrics) {
+          setLoadMetrics((prev) => ({ ...prev, [dataset]: metrics }));
+        }
       } catch (err) {
         const datasetError = err as DatasetLoadError;
 
@@ -235,6 +256,16 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
         setLoadStatus('error');
         setIsFiltering(false);
         setErrorDetails(toNormalizedError(datasetError));
+        setDatasetMetadata((prev) => {
+          const next = { ...prev };
+          delete next[dataset];
+          return next;
+        });
+        setLoadMetrics((prev) => {
+          const next = { ...prev };
+          delete next[dataset];
+          return next;
+        });
       }
     },
     [parseFiltersFromSearch]
@@ -354,6 +385,8 @@ export const WineDataProvider: React.FC<{ children: ReactNode }> = ({
         featureRanges,
         retryLoad,
         lastLoadedAt,
+        datasetMetadata,
+        loadMetrics,
       }}
     >
       {children}

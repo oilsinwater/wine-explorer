@@ -5,17 +5,17 @@ import {
   WineDataProvider,
   WineDataContext,
 } from '../../../src/context/WineDataContext';
-import { wineDataManager } from '../../../src/utils/WineDataManager';
+import { wineDataManager } from '../../../src/data/WineDataManager';
 import { DatasetLoadError } from '../../../src/utils/errors';
 
 const sampleRow = {
-  'fixed acidity': 7.4,
-  'volatile acidity': 0.7,
-  'citric acid': 0,
-  'residual sugar': 1.9,
+  fixedAcidity: 7.4,
+  volatileAcidity: 0.7,
+  citricAcid: 0,
+  residualSugar: 1.9,
   chlorides: 0.076,
-  'free sulfur dioxide': 11,
-  'total sulfur dioxide': 34,
+  freeSulfurDioxide: 11,
+  totalSulfurDioxide: 34,
   density: 0.9978,
   pH: 3.51,
   sulphates: 0.56,
