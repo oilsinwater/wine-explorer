@@ -22,49 +22,49 @@ export const Route = createFileRoute('/')({
 function Index() {
   const featureSections = [
     {
-      eyebrow: 'Dataset curation',
-      title: 'Documented provenance with reproducible notes',
+      eyebrow: 'Dataset provenance',
+      title: 'Direct from the Portuguese Vinho Verde study',
       description:
-        'Both UCI wine quality datasets include bibliographic references, schema mappings, and step-by-step loading instructions so seminars can cite work with confidence.',
+        'Explore the red and white wine quality datasets from the original research by Cortez et al. (2009) on "Modeling wine preferences by data mining from physicochemical properties", including all 11 physicochemical measurements with quality scores.',
     },
     {
-      eyebrow: 'Filtering practice',
-      title: 'Cohort shaping through accessible controls',
+      eyebrow: 'Academic rigor',
+      title: 'Reproduce the regression-based quality prediction',
       description:
-        'Range inputs are keyboard navigable and screen-reader annotated, inviting discussion about inclusive filter design while highlighting physicochemical trade-offs.',
+        'Filter and analyze the same physicochemical variables used in the original study, allowing students to reproduce and critique the methodology used to predict wine quality ratings.',
     },
     {
-      eyebrow: 'Visual reading',
+      eyebrow: 'Visual exploration',
       title: 'Histograms and scatter plots for comparison',
       description:
-        'Parallel views allow facilitators to contrast distributions and correlations in real time, reinforcing interpretive skills with quantitative footing.',
+        'Parallel views allow facilitators to contrast distributions and correlations in real time, reinforcing interpretive skills with the quantitative foundation of the original research.',
     },
     {
       eyebrow: 'Accessibility',
       title: 'High-contrast toggles with narrated feedback',
       description:
-        'Help, narration, and high-contrast controls sit within the visualization frame so accessibility conversations can unfold alongside the data story.',
+        'Help, narration, and high-contrast controls sit within the visualization frame so accessibility conversations can unfold alongside the data story from the original study.',
     },
   ];
 
   const workflowSteps = [
     {
       step: '1',
-      title: 'Pick a dataset',
+      title: 'Select wine type',
       description:
-        'Switch between red and white wine chemistry to instantly reframe the conversation with stakeholders.',
+        'Choose between the red and white Vinho Verde datasets from the Cortez et al. study to explore the physicochemical properties examined in the original research.',
     },
     {
       step: '2',
-      title: 'Shape the profile',
+      title: 'Filter physicochemical ranges',
       description:
-        'Adjust physicochemical ranges to focus on styles like crisp whites or bold reds while counts update live.',
+        'Adjust parameters like fixed acidity, volatile acidity, citric acid, and alcohol content to investigate how these variables correlate with quality ratings in the original study.',
     },
     {
       step: '3',
-      title: 'Share the story',
+      title: 'Analyze quality predictions',
       description:
-        'Use the visualization callouts and metadata panel to explain what makes standout vintages memorable.',
+        'Examine how the 11 physicochemical measurements relate to quality scores to understand the modeling approach used in the original research.',
     },
   ];
 
@@ -85,8 +85,7 @@ function Index() {
                   Wine Explorer
                 </Typography>
                 <Typography component="h1" variant="h1" sx={{ maxWidth: 620 }}>
-                  A reference surface for discussing wine chemistry in academic
-                  settings
+                  Academic interface for the Portuguese Vinho Verde study
                 </Typography>
                 <Typography
                   variant="body1"
@@ -94,11 +93,11 @@ function Index() {
                     color: 'text.secondary',
                   }}
                 >
-                  This single-page application accompanies the Wine Explorer
-                  PRD. It offers a reserved environment for unpacking the UCI
-                  red and white wine quality datasets, encouraging structured
-                  critique of filtering choices, visualization literacy, and
-                  accessibility practices.
+                  This interface accompanies the original research by Cortez et
+                  al. (2009) on "Modeling wine preferences by data mining from
+                  physicochemical properties". Students can explore the red and
+                  white wine quality datasets to understand the methodology and
+                  reproduce analyses from the study.
                 </Typography>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
@@ -116,13 +115,13 @@ function Index() {
                   </Button>
                   <Button
                     component="a"
-                    href="https://strudel.science/docs"
+                    href="https://repositorium.uminho.pt/server/api/core/bitstreams/f3dd2aa2-9eda-4eba-b50e-6306a0bd0c66/content"
                     target="_blank"
                     rel="noreferrer"
                     variant="text"
                     size="large"
                   >
-                    View methodology notes
+                    Read original paper
                   </Button>
                 </Stack>
               </Stack>
@@ -138,34 +137,67 @@ function Index() {
               >
                 <Stack spacing={2}>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Reference dossier
+                    Research references
                   </Typography>
                   <Stack spacing={1.5}>
                     <Stack spacing={0.5}>
                       <Typography variant="caption" color="text.secondary">
-                        Dataset citation
+                        Original study
                       </Typography>
                       <Typography variant="body2">
-                        Cortez et&nbsp;al., 2009 — UCI Wine Quality (DOI:
-                        10.24432/C56S3T)
+                        Cortez, P., Cerdeira, A., Almeida, F., Matos, T., &
+                        Reis, J. (2009). Modeling wine preferences by data
+                        mining from physicochemical properties.
+                        <i>Food Research International</i>, 42(5), 640-647.
                       </Typography>
                     </Stack>
                     <Stack spacing={0.5}>
                       <Typography variant="caption" color="text.secondary">
-                        Variables
+                        Dataset sources
                       </Typography>
                       <Typography variant="body2">
-                        11 physicochemical measurements with quality scores,
-                        covering red and white wine styles
+                        <a
+                          href="https://archive.ics.uci.edu/dataset/186/wine+quality"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          UCI Machine Learning Repository
+                        </a>
+                        <br />
+                        <a
+                          href="https://github.com/uci-ml-repo/ucimlrepo"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          UCI ML Repo GitHub
+                        </a>
                       </Typography>
                     </Stack>
                     <Stack spacing={0.5}>
                       <Typography variant="caption" color="text.secondary">
-                        Classroom use
+                        Sample sizes
                       </Typography>
                       <Typography variant="body2">
-                        Support critiques of data storytelling, reproducibility,
-                        and accessible interface construction.
+                        Red wine: 1,599 samples | White wine: 4,898 samples
+                      </Typography>
+                    </Stack>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        Physicochemical variables
+                      </Typography>
+                      <Typography variant="body2">
+                        Fixed acidity, volatile acidity, citric acid, residual
+                        sugar, chlorides, free sulfur dioxide, total sulfur
+                        dioxide, density, pH, sulphates, alcohol
+                      </Typography>
+                    </Stack>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        Modeling focus
+                      </Typography>
+                      <Typography variant="body2">
+                        Regression-based quality prediction using
+                        physicochemical properties
                       </Typography>
                     </Stack>
                   </Stack>
@@ -184,19 +216,20 @@ function Index() {
         <Stack spacing={6}>
           <Stack spacing={1}>
             <Typography variant="overline" color="text.secondary">
-              Interface emphasis
+              Academic focus
             </Typography>
             <Typography variant="h3" component="h2">
-              Built for instruction, replication, and critique
+              Built for reproducing and critiquing the original research
             </Typography>
             <Typography
               variant="body1"
               color="text.secondary"
               sx={{ maxWidth: 720 }}
             >
-              Each section foregrounds process over polish so faculty and
-              students can interrogate design decisions while remaining close to
-              the underlying datasets.
+              Each section foregrounds the methodology from Cortez et al. (2009)
+              so faculty and students can reproduce analyses, validate findings,
+              and critique the modeling approach using the same physicochemical
+              datasets.
             </Typography>
           </Stack>
           <Box
