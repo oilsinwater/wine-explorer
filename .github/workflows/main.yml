@@ -35,9 +35,4 @@ jobs:
       # Install npm dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          start: npm run serve
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 120
+        run: npm run test:e2e
