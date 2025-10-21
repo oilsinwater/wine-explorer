@@ -1,28 +1,19 @@
-import { Box, Stack } from '@mui/material';
+import { Box } from '@mui/material';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TopBar } from '../components/TopBar';
 
 /**
- * Basic layout with navbar and footer
+ * Basic layout without navbar
  */
 export const Route = createRootRoute({
   component: () => (
-    <Stack
-      spacing={0}
+    <Box
+      component="main"
       sx={{
         height: '100%',
+        paddingBottom: 4,
       }}
     >
-      <TopBar />
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          paddingBottom: 4,
-        }}
-      >
-        <Outlet />
-      </Box>
-    </Stack>
+      <Outlet />
+    </Box>
   ),
 });

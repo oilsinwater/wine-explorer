@@ -1,124 +1,183 @@
 import { createTheme } from '@mui/material';
 import type {} from '@mui/x-data-grid/themeAugmentation';
 
-/**
- * MUI Theme object for setting app-wide and component-wide styles.
- * Specify colors, spacing, fonts, and more.
- * Learn more about theme options: https://mui.com/material-ui/customization/theming/
- */
+const bodyFontFamily =
+  '"Inter", "Helvetica Neue", "Arial", "Segoe UI", sans-serif';
+const displayFontFamily =
+  '"Source Serif 4", "Iowan Old Style", "Times New Roman", serif';
+
 export const theme = createTheme({
-  // Color palette to use throughout the app
   palette: {
     mode: 'light',
     background: {
-      default: '#F5F5F6',
-      paper: '#fff',
+      default: '#f8f8f5',
+      paper: '#ffffff',
     },
     primary: {
-      main: '#1976d2',
-      // Exclude light, dark, or contrastText to have them
-      // calculated automatically based on the main color.
-      light: '#42a5f5',
-      dark: '#1565c0',
-      contrastText: '#fff',
+      main: '#1c336b',
+      light: '#3f4f8f',
+      dark: '#111c45',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#9c27b0',
-      light: '#ba68c8',
-      dark: '#7b1fa2',
-      contrastText: '#fff',
+      main: '#6f7f6b',
+      light: '#95a38f',
+      dark: '#556452',
+      contrastText: '#ffffff',
     },
     info: {
-      main: '#0288d1',
-      light: '#03a9f4',
-      dark: '#01579b',
-      contrastText: '#fff',
+      main: '#55708e',
+      light: '#7a93b0',
+      dark: '#354c63',
+      contrastText: '#ffffff',
     },
     success: {
-      main: '#2e7d32',
-      light: '#4caf50',
-      dark: '#1b5e20',
-      contrastText: '#fff',
+      main: '#2f6b3d',
+      light: '#4b8758',
+      dark: '#1b4d27',
+      contrastText: '#ffffff',
     },
     warning: {
-      main: '#ed6c02',
-      light: '#ff9800',
-      dark: '#e65100',
-      contrastText: '#fff',
+      main: '#b36b04',
+      light: '#d5851c',
+      dark: '#764601',
+      contrastText: '#ffffff',
     },
     error: {
-      main: '#d32f2f',
-      light: '#ef5350',
-      dark: '#c62828',
-      contrastText: '#fff',
+      main: '#b23b3b',
+      light: '#d15b5b',
+      dark: '#7a2626',
+      contrastText: '#ffffff',
     },
+    text: {
+      primary: '#1f1f1f',
+      secondary: '#494943',
+    },
+    divider: '#e0e0da',
     neutral: {
-      main: '#DADADA',
-      light: '#e0e0e0',
-      dark: '#828282',
+      main: '#deded8',
+      light: '#f1f1ed',
+      dark: '#9f9f9a',
     },
     common: {
-      black: '#000',
-      white: '#fff',
+      black: '#0d0d0d',
+      white: '#ffffff',
     },
     grey: {
-      50: '#ddd',
-      500: '#999',
-      900: '#444',
+      50: '#f4f4f0',
+      100: '#e5e5e0',
+      300: '#c7c7c0',
+      500: '#8a8a84',
+      700: '#5b5b57',
+      900: '#1f1f1c',
     },
   },
-  // Control the default border radius
   shape: {
-    borderRadius: 4,
+    borderRadius: 8,
   },
-  // Control the font, size, and font weights
   typography: {
     htmlFontSize: 16,
-    fontFamily: `"Helvetica", "Verdana", "Arial", sans-serif`,
-    fontSize: 14,
+    fontFamily: bodyFontFamily,
+    fontSize: 15,
     fontWeightLight: 300,
     fontWeightRegular: 400,
     fontWeightMedium: 500,
     fontWeightBold: 700,
+    h1: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '3rem',
+      lineHeight: 1.08,
+      letterSpacing: '-0.015em',
+    },
+    h2: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '2.25rem',
+      lineHeight: 1.1,
+      letterSpacing: '-0.01em',
+    },
+    h3: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '1.8rem',
+      lineHeight: 1.18,
+    },
+    h4: {
+      fontFamily: bodyFontFamily,
+      fontWeight: 600,
+      fontSize: '1.5rem',
+    },
+    h5: {
+      fontFamily: bodyFontFamily,
+      fontWeight: 600,
+      fontSize: '1.25rem',
+    },
+    h6: {
+      fontFamily: bodyFontFamily,
+      fontWeight: 600,
+      fontSize: '1.1rem',
+    },
+    overline: {
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: '0.16em',
+      fontSize: '0.75rem',
+    },
+    subtitle1: {
+      fontWeight: 500,
+    },
+    subtitle2: {
+      fontWeight: 500,
+      letterSpacing: '0.015em',
+    },
+    body1: {
+      lineHeight: 1.7,
+    },
+    body2: {
+      lineHeight: 1.6,
+    },
+    button: {
+      fontWeight: 500,
+      letterSpacing: '0.02em',
+      textTransform: 'none',
+    },
   },
-  // Default options for MUI components used throughout the app
   components: {
-    /**
-     * Example component customization.
-     * Learn more at https://mui.com/material-ui/customization/theme-components/
-     * 
-        MuiComponentName: {
-          defaultProps: {
-            // Put prop names and values here
-          },
-          styleOverrides: {
-            root: {
-              // Put styles here
-            }
-          },
-          // Create new custom variants of certain components
-          variants: [
-            {
-              props: { variant: '' },
-              style: {
-                // Put styles here
-              },
-            },
-          ],
-        },
-     *
-     */
     MuiButton: {
-      variants: [
-        {
-          props: { color: 'neutral' },
-          style: {
-            backgroundColor: 'white',
-            borderColor: '#bdbdbd',
-            color: '#757575',
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 999,
+          paddingBlock: '0.6rem',
+          paddingInline: '1.25rem',
+        },
+        contained: {
+          boxShadow: 'none',
+        },
+        containedPrimary: {
+          backgroundColor: '#1c336b',
+          '&:hover': {
+            backgroundColor: '#162856',
           },
         },
-      ],
+        outlined: {
+          borderWidth: 1,
+          borderColor: '#1c336b',
+          color: '#1c336b',
+          backgroundColor: 'transparent',
+          '&:hover': {
+            borderColor: '#162856',
+            backgroundColor: 'rgba(28, 51, 107, 0.06)',
+          },
+        },
+        text: {
+          color: '#1c336b',
+          paddingInline: '0.75rem',
+        },
+      },
     },
     MuiLink: {
       styleOverrides: {
@@ -132,6 +191,40 @@ export const theme = createTheme({
         spacing: 2,
       },
     },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          border: '1px solid #e0e0da',
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 999,
+          paddingInline: 6,
+          fontFamily: bodyFontFamily,
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 999,
+          textTransform: 'none',
+          borderColor: '#d0d0cc',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(28, 51, 107, 0.12)',
+            borderColor: '#1c336b',
+            color: '#1c336b',
+          },
+        },
+      },
+    },
     MuiDataGrid: {
       styleOverrides: {
         root: {
@@ -143,10 +236,11 @@ export const theme = createTheme({
             minHeight: '4rem',
           },
           '& .MuiDataGrid-columnHeaderTitle': {
-            color: 'grey.900',
+            color: '#1f1f1f',
             fontSize: '0.85rem',
-            fontWeight: 'bold',
+            fontWeight: 600,
             textTransform: 'uppercase',
+            letterSpacing: '0.08em',
           },
         },
       },
@@ -190,22 +284,39 @@ export const highContrastTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 4,
+    borderRadius: 8,
   },
   typography: {
     htmlFontSize: 16,
-    fontFamily: `"Helvetica", "Verdana", "Arial", sans-serif`,
-    fontSize: 14,
+    fontFamily: bodyFontFamily,
+    fontSize: 15,
     fontWeightLight: 300,
     fontWeightRegular: 400,
     fontWeightMedium: 500,
     fontWeightBold: 700,
+    h1: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '3rem',
+      lineHeight: 1.08,
+    },
+    h2: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '2.25rem',
+    },
+    h3: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      fontSize: '1.8rem',
+    },
   },
   components: {
     MuiPaper: {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+          border: '1px solid #374151',
         },
       },
     },
@@ -213,10 +324,6 @@ export const highContrastTheme = createTheme({
       styleOverrides: {
         contained: {
           boxShadow: 'none',
-        },
-        outlined: {
-          borderColor: '#f9fafb',
-          color: '#f9fafb',
         },
       },
     },
