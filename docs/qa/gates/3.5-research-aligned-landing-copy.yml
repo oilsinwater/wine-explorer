@@ -1,0 +1,51 @@
+schema: 1
+story: '3.5'
+story_title: 'Research-Aligned Landing Copy'
+gate: PASS
+status_reason: 'Landing copy already satisfies research alignment; tests and manual checks confirm no regressions.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-03-15T15:27:00Z'
+
+top_issues: []
+waiver:
+  active: false
+
+quality_score: 100
+expires: '2025-03-29T15:27:00Z'
+
+evidence:
+  tests_reviewed: 59
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Static copy change only; no auth or data handling impact.'
+  performance:
+    status: PASS
+    notes: 'No runtime code touched; existing performance profile unaffected.'
+  reliability:
+    status: PASS
+    notes: 'Navigation and accessibility controls verified manually.'
+  maintainability:
+    status: PASS
+    notes: 'Documentation-only story; structure and references remain clear.'
+
+recommendations:
+  immediate: []
+  future: []
+test_design:
+  scenarios_total: 6
+  by_level:
+    unit: 2
+    integration: 0
+    e2e: 4
+  by_priority:
+    p0: 0
+    p1: 5
+    p2: 1
+    p3: 0
+  coverage_gaps: []

@@ -1,0 +1,59 @@
+schema: 1
+story: '3.6'
+story_title: 'Single Page Workspace Integration - Brownfield Addition'
+gate: CONCERNS
+status_reason: 'Story remains in Draft and lacks required template sections/tasks; not ready for implementation.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-03-15T16:25:00Z'
+
+top_issues:
+  - id: SM-3_6-TEMPLATE
+    severity: medium
+    finding: 'Story is free-form and does not use the standard story template (missing Status, Acceptance Criteria section format, Tasks/Subtasks, Dev Notes, Testing, Change Log, etc.).'
+    suggested_action: 'Rewrite story using the official template so downstream agents can track progress and update Dev/QA sections.'
+    suggested_owner: sm
+  - id: SM-3_6-NO_TASKS
+    severity: medium
+    finding: 'No actionable Tasks/Subtasks are defined; developers lack an execution checklist tied to ACs.'
+    suggested_action: 'Add Tasks/Subtasks referencing the key files (`index.tsx`, `wine-explorer.tsx`, router config), testing, and documentation updates.'
+    suggested_owner: sm
+
+waiver:
+  active: false
+
+quality_score: 80
+expires: '2025-03-29T16:25:00Z'
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 2
+  trace:
+    ac_covered: []
+    ac_gaps: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+nfr_validation:
+  security:
+    status: CONCERNS
+    notes: 'No implementation yet, but story does not specify security considerations or regression plan for context providers.'
+  performance:
+    status: CONCERNS
+    notes: 'Story acknowledges bundle/perf monitoring but lacks acceptance criteria/tests to enforce it.'
+  reliability:
+    status: CONCERNS
+    notes: 'Keyboard navigation and skip-link requirements stated without validation strategy.'
+  maintainability:
+    status: FAIL
+    notes: 'Without template structure, story is difficult to maintain; Dev/QA agents cannot document updates.'
+
+recommendations:
+  immediate:
+    - action: 'Recreate the story using the official story template, populate Status, Tasks/Subtasks, Dev Notes, Testing, Change Log, and QA placeholders.'
+      refs:
+        - '.agents/stories/3.6.single-page-workspace-integration.md'
+    - action: 'Add concrete checklist items for merging `wine-explorer` into `index.tsx`, updating routing, and validating provider integration.'
+      refs:
+        - '.agents/stories/3.6.single-page-workspace-integration.md'
+  future:
+    - action: 'Document risk mitigations for bundle-size monitoring and accessibility regression once implementation begins.'
+      refs:
+        - '.agents/stories/3.6.single-page-workspace-integration.md'
