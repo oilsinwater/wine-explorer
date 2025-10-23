@@ -81,11 +81,8 @@ function Index() {
           <Grid container spacing={{ xs: 4, md: 8 }} alignItems="flex-start">
             <Grid item xs={12} md={7}>
               <Stack spacing={3} sx={{ maxWidth: 640 }}>
-                <Typography variant="overline" color="text.secondary">
-                  Wine Explorer
-                </Typography>
                 <Typography component="h1" variant="h1" sx={{ maxWidth: 620 }}>
-                  Academic interface for the Portuguese Vinho Verde study
+                  Interactive lab for the Vinho Verde wine dataset
                 </Typography>
                 <Typography
                   variant="body1"

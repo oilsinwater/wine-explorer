@@ -8,6 +8,7 @@ import {
   Alert,
   Button,
   Skeleton,
+  Box,
 } from '@mui/material';
 import { WineDataContext } from '../context/WineDataContext';
 import { useDelayedVisibility } from '../hooks/useDelayedVisibility';
@@ -16,6 +17,8 @@ import { useAccessibility } from '../context/AccessibilityContext';
 export interface DatasetSelectorProps {
   className?: string;
 }
+
+const CONTROLS_HEIGHT = 40;
 
 /**
  * Component for selecting between red and white wine datasets
@@ -40,7 +43,8 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     wineData,
   } = context;
 
-  const { announce } = useAccessibility();
+  const { announce, highContrastEnabled, toggleHighContrast } =
+    useAccessibility();
   const labelId = useId();
   const statusId = useId();
   const errorAlertRef = useRef<HTMLDivElement | null>(null);
@@ -137,6 +141,105 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     }
   };
 
+  const datasetControl = showSpinner ? (
+    <Box
+      sx={{
+        height: CONTROLS_HEIGHT,
+        display: 'flex',
+        alignItems: 'center',
+        px: 1,
+      }}
+    >
+      <CircularProgress
+        size={24}
+        aria-live="polite"
+        aria-label={`Loading ${datasetMeta.label.toLowerCase()} wine dataset`}
+      />
+    </Box>
+  ) : loadStatus === 'error' && error ? (
+    <Alert
+      ref={errorAlertRef}
+      tabIndex={-1}
+      severity="error"
+      role="alert"
+      action={
+        error.retryable ? (
+          <Button color="inherit" size="small" onClick={retryLoad}>
+            Retry
+          </Button>
+        ) : undefined
+      }
+      sx={{
+        alignItems: 'flex-start',
+        flex: 1,
+        minHeight: CONTROLS_HEIGHT,
+        display: 'flex',
+      }}
+    >
+      <Typography component="span" variant="subtitle2" display="block">
+        {error.title}
+      </Typography>
+      <Typography component="span" variant="body2">
+        {error.description}
+      </Typography>
+    </Alert>
+  ) : loadStatus === 'loading' ? (
+    <Skeleton
+      variant="rounded"
+      height={CONTROLS_HEIGHT}
+      width={220}
+      aria-hidden
+    />
+  ) : (
+    <ToggleButtonGroup
+      value={currentDataset}
+      exclusive
+      onChange={handleDatasetChange}
+      aria-labelledby={labelId}
+      aria-describedby={statusId}
+      disabled={loading}
+      sx={{
+        height: CONTROLS_HEIGHT,
+        flexWrap: 'nowrap',
+        '& .MuiToggleButton-root': {
+          height: '100%',
+          px: 2.5,
+        },
+      }}
+    >
+      <ToggleButton
+        value="red"
+        aria-label="red wine dataset"
+        sx={{
+          '&.Mui-selected': {
+            backgroundColor: (theme) => theme.palette.primary.main,
+            color: (theme) => theme.palette.primary.contrastText,
+            '&:hover': {
+              backgroundColor: (theme) => theme.palette.primary.dark,
+            },
+          },
+        }}
+      >
+        Red
+      </ToggleButton>
+      <ToggleButton
+        value="white"
+        aria-label="white wine dataset"
+        sx={{
+          '&.Mui-selected': {
+            backgroundColor: (theme) => theme.palette.primary.light,
+            color: (theme) => theme.palette.primary.contrastText,
+            '&:hover': {
+              backgroundColor: (theme) => theme.palette.primary.main,
+            },
+          },
+        }}
+      >
+        White
+      </ToggleButton>
+    </ToggleButtonGroup>
+  );
+
   return (
     <Stack
       spacing={1.5}
@@ -147,77 +250,65 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       <Typography variant="subtitle2" component="h3" id={labelId}>
         Dataset
       </Typography>
-      {showSpinner ? (
-        <CircularProgress
-          size={24}
-          aria-live="polite"
-          aria-label={`Loading ${datasetMeta.label.toLowerCase()} wine dataset`}
-        />
-      ) : loadStatus === 'error' && error ? (
-        <Alert
-          ref={errorAlertRef}
-          tabIndex={-1}
-          severity="error"
-          role="alert"
-          action={
-            error.retryable ? (
-              <Button color="inherit" size="small" onClick={retryLoad}>
-                Retry
-              </Button>
-            ) : undefined
-          }
-          sx={{ alignItems: 'flex-start' }}
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={1}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        sx={{
+          width: '100%',
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          rowGap: 1.5,
+        }}
+      >
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1}
+          alignItems={{ xs: 'stretch', sm: 'center' }}
+          sx={{ flexGrow: 1, minWidth: 0, rowGap: 1.5 }}
         >
-          <Typography component="span" variant="subtitle2" display="block">
-            {error.title}
-          </Typography>
-          <Typography component="span" variant="body2">
-            {error.description}
-          </Typography>
-        </Alert>
-      ) : loadStatus === 'loading' ? (
-        <Skeleton variant="rounded" height={36} width={220} aria-hidden />
-      ) : (
-        <ToggleButtonGroup
-          value={currentDataset}
-          exclusive
-          onChange={handleDatasetChange}
-          aria-labelledby={labelId}
-          aria-describedby={statusId}
-          disabled={loading}
-        >
-          <ToggleButton
-            value="red"
-            aria-label="red wine dataset"
+          <Box
             sx={{
-              '&.Mui-selected': {
-                backgroundColor: (theme) => theme.palette.primary.main,
-                color: (theme) => theme.palette.primary.contrastText,
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.primary.dark,
-                },
-              },
+              flex: { xs: 1, sm: '0 0 auto' },
+              display: 'flex',
+              alignItems: 'center',
+              width: { xs: '100%', sm: 'auto' },
+              minHeight: CONTROLS_HEIGHT,
             }}
           >
-            Red
-          </ToggleButton>
-          <ToggleButton
-            value="white"
-            aria-label="white wine dataset"
+            {datasetControl}
+          </Box>
+          <Button
+            variant={highContrastEnabled ? 'outlined' : 'contained'}
+            color="primary"
+            onClick={toggleHighContrast}
+            aria-pressed={highContrastEnabled}
             sx={{
-              '&.Mui-selected': {
-                backgroundColor: (theme) => theme.palette.secondary.main,
-                color: (theme) => theme.palette.secondary.contrastText,
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.secondary.dark,
-                },
-              },
+              height: CONTROLS_HEIGHT,
+              px: 2.5,
+              flex: { xs: 1, sm: '0 0 auto' },
             }}
           >
-            White
-          </ToggleButton>
-        </ToggleButtonGroup>
-      )}
+            {highContrastEnabled ? 'Standard contrast' : 'High contrast'}
+          </Button>
+        </Stack>
+        <Button
+          component="a"
+          href="https://strudel.science/strudel-kit/docs/"
+          variant="outlined"
+          color="primary"
+          target="_blank"
+          rel="noreferrer"
+          sx={{
+            height: CONTROLS_HEIGHT,
+            px: 2.5,
+            flex: { xs: 1, sm: '0 0 auto' },
+            alignSelf: { xs: 'stretch', sm: 'center' },
+            ml: { sm: 'auto' },
+          }}
+        >
+          Help
+        </Button>
+      </Stack>
       <Typography
         id={statusId}
         variant="caption"

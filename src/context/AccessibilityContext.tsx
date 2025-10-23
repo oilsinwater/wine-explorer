@@ -77,7 +77,7 @@ export const AccessibilityProvider: React.FC<PropsWithChildren> = ({
 
     document.documentElement.style.setProperty(
       '--focus-ring-color',
-      highContrastEnabled ? '#ffbf47' : '#005fcc'
+      highContrastEnabled ? '#ffbf47' : '#7b0323'
     );
   }, [highContrastEnabled]);
 

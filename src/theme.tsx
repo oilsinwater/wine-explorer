@@ -14,9 +14,9 @@ export const theme = createTheme({
       paper: '#ffffff',
     },
     primary: {
-      main: '#1c336b',
-      light: '#3f4f8f',
-      dark: '#111c45',
+      main: '#7b0323',
+      light: '#a53a55',
+      dark: '#4c0114',
       contrastText: '#ffffff',
     },
     secondary: {
@@ -26,9 +26,9 @@ export const theme = createTheme({
       contrastText: '#ffffff',
     },
     info: {
-      main: '#55708e',
-      light: '#7a93b0',
-      dark: '#354c63',
+      main: '#a53a55',
+      light: '#d2889d',
+      dark: '#702033',
       contrastText: '#ffffff',
     },
     success: {
@@ -158,23 +158,23 @@ export const theme = createTheme({
           boxShadow: 'none',
         },
         containedPrimary: {
-          backgroundColor: '#1c336b',
+          backgroundColor: '#7b0323',
           '&:hover': {
-            backgroundColor: '#162856',
+            backgroundColor: '#61021b',
           },
         },
         outlined: {
           borderWidth: 1,
-          borderColor: '#1c336b',
-          color: '#1c336b',
+          borderColor: '#7b0323',
+          color: '#7b0323',
           backgroundColor: 'transparent',
           '&:hover': {
-            borderColor: '#162856',
-            backgroundColor: 'rgba(28, 51, 107, 0.06)',
+            borderColor: '#61021b',
+            backgroundColor: 'rgba(123, 3, 35, 0.06)',
           },
         },
         text: {
-          color: '#1c336b',
+          color: '#7b0323',
           paddingInline: '0.75rem',
         },
       },
@@ -218,9 +218,9 @@ export const theme = createTheme({
           textTransform: 'none',
           borderColor: '#d0d0cc',
           '&.Mui-selected': {
-            backgroundColor: 'rgba(28, 51, 107, 0.12)',
-            borderColor: '#1c336b',
-            color: '#1c336b',
+            backgroundColor: 'rgba(123, 3, 35, 0.12)',
+            borderColor: '#7b0323',
+            color: '#7b0323',
           },
         },
       },

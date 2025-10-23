@@ -33,8 +33,7 @@ export const VisualizationArea: React.FC = () => {
   const context = useContext(WineDataContext);
   const regionLabelId = useId();
   const descriptionId = useId();
-  const { announce, highContrastEnabled, toggleHighContrast } =
-    useAccessibility();
+  const { announce } = useAccessibility();
   const hasAnnounced = useRef(false);
 
   const [selectedVisualization, setSelectedVisualization] = useState<
@@ -227,49 +226,22 @@ export const VisualizationArea: React.FC = () => {
       aria-busy={loading}
     >
       <Stack spacing={2} sx={{ mb: 2 }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h6" component="h3" id={regionLabelId}>
-              Visualization
-            </Typography>
-            <Typography
-              variant="body2"
-              component="p"
-              color="text.secondary"
-              id={descriptionId}
-              aria-live="polite"
-              role="status"
-            >
-              {datasetReady
-                ? `${visualizationSummary} Dataset: ${currentDataset} wine.`
-                : 'Dataset is preparing. Visualization controls are disabled.'}
-            </Typography>
-          </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button
-              component="a"
-              href="https://strudel.science/strudel-kit/docs/"
-              variant="outlined"
-              color="inherit"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Help
-            </Button>
-            <Button
-              variant="contained"
-              color={highContrastEnabled ? 'secondary' : 'primary'}
-              onClick={toggleHighContrast}
-              aria-pressed={highContrastEnabled}
-            >
-              {highContrastEnabled ? 'Standard contrast' : 'High contrast'}
-            </Button>
-          </Stack>
+        <Stack spacing={1} sx={{ minWidth: 0 }}>
+          <Typography variant="h6" component="h3" id={regionLabelId}>
+            Visualization
+          </Typography>
+          <Typography
+            variant="body2"
+            component="p"
+            color="text.secondary"
+            id={descriptionId}
+            aria-live="polite"
+            role="status"
+          >
+            {datasetReady
+              ? `${visualizationSummary} Dataset: ${currentDataset} wine.`
+              : 'Dataset is preparing. Visualization controls are disabled.'}
+          </Typography>
         </Stack>
         <Stack
           direction="row"

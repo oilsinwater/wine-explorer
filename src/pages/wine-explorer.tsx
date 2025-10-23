@@ -1,9 +1,11 @@
-import { Box, Container, Grid, styled } from '@mui/material';
+import { Box, Button, Container, Grid, styled } from '@mui/material';
 import { createFileRoute } from '@tanstack/react-router';
 import { DatasetSelector } from '../components/DatasetSelector';
 import { InfoPanel } from '../components/InfoPanel';
 import { VisualizationArea } from '../components/visualizations/VisualizationArea';
 import { FilterPanel } from '../components/FilterPanel';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { AppLink } from '../components/AppLink';
 
 export const Route = createFileRoute('/wine-explorer')({
   component: WineExplorer,
@@ -33,6 +35,19 @@ function WineExplorer() {
 
   return (
     <StyledContainer maxWidth="lg">
+      <Box sx={{ mb: { xs: 2, md: 3 } }}>
+        <Button
+          component={AppLink}
+          to="/"
+          variant="text"
+          color="primary"
+          size="small"
+          startIcon={<ArrowBackIcon fontSize="small" />}
+          sx={{ textTransform: 'none' }}
+        >
+          Back to overview
+        </Button>
+      </Box>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <StyledDatasetSelector />
