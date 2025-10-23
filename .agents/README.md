@@ -63,7 +63,7 @@ Extended component behaviours, props, and event descriptions are maintained in [
 ## Development Workflow
 
 1. **Install dependencies:** `npm install`
-2. **Run the app:** `npm run dev` (opens on http://localhost:5175)
+2. **Run the app:** `npm run dev` (opens on http://localhost:5173 by default, configurable via VITE_PORT environment variable)
 3. **Edit and preview:** Changes hot-reload through Vite; dataset switches stream status messages to assistive tech.
 4. **Validate:**
    - Static analysis: `npm run lint`, `npm run prettier`

@@ -26,7 +26,7 @@ npm install
    npm run dev
    ```
 
-   - Serves the app on http://localhost:5175 with strict port enforcement.
+   - Serves the app on http://localhost:5173 by default (configurable via VITE_PORT environment variable).
    - Static CSV datasets are available under `/data/winequality-*.csv`.
 
 2. **Edit with fast feedback**
@@ -66,7 +66,7 @@ npm install
   VITE_BASE_URL=/wine-explorer/
   ```
 - **Analytics and external services:** None configured—additions must include documentation updates and opt-in toggles.
-- **Testing env:** Cypress assumes the app runs on http://localhost:5175. Update `cypress.config.ts` if you change the port.
+- **Testing env:** Cypress uses the port specified by the CYPRESS_BASE_URL environment variable or defaults to http://localhost:3000.
 
 ## Release and Deployment Checklist
 

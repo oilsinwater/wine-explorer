@@ -308,7 +308,7 @@ Start up the app:
 npm start
 ```
 
-Open [http://localhost:5175](http://localhost:5175) to view the app in the browser.
+Open [http://localhost:5173](http://localhost:5173) to view the app in the browser by default. The port can be configured using the VITE_PORT environment variable.
 
 Begin modifying the templates in `src/pages`.
 
@@ -733,7 +733,7 @@ Once the install completes successfully, start the application.
 npm start
 ```
    
-Now you should be able to access the web app at [https://localhost:5175](https://localhost:5175)
+Now you should be able to access the web app at [https://localhost:5173](https://localhost:5173) by default. The port can be configured using the VITE_PORT environment variable.
 
 
 ## Issues and Discussions
@@ -956,7 +956,7 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5175/',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:3000/',
     specPattern: [
       'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
       'src/**/*.cy.{js,jsx,ts,tsx}',
@@ -1183,7 +1183,7 @@ export default defineConfig(({ mode }) => {
     plugins: [TanStackRouterVite({ autoCodeSplitting: true }), react()],
     base: env.VITE_BASE_URL,
     server: {
-      port: 5175,
+      port: parseInt(env.VITE_PORT) || 5173,
       strictPort: true,
     },
   };

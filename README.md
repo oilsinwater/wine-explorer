@@ -29,7 +29,13 @@ npm install
 npm run dev
 ```
 
-The Vite dev server runs on http://localhost:5175 with strict port enforcement. Environment variables are optional; define `VITE_BASE_URL` in a `.env` file if the app is hosted behind a path prefix.
+The Vite dev server runs on http://localhost:5173 by default. You can configure the port by setting the `VITE_PORT` environment variable:
+
+```bash
+VITE_PORT=8080 npm run dev
+```
+
+Environment variables can also be defined in a `.env` file. See `.env.example` for available options.
 
 ## Quality Checks & Testing
 

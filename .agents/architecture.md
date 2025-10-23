@@ -572,7 +572,7 @@ jobs:
 
 | Environment | Frontend URL                              | Backend URL | Purpose                |
 | ----------- | ----------------------------------------- | ----------- | ---------------------- |
-| Development | http://localhost:3000                     | N/A         | Local development      |
+| Development | http://localhost:5173 (configurable)      | N/A         | Local development      |
 | Staging     | https://staging.wine-explorer.example.com | N/A         | Pre-production testing |
 | Production  | https://wine-explorer.example.com         | N/A         | Live environment       |
 
